@@ -14,15 +14,23 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+defined('MOODLE_INTERNAL') || die();
+
 /**
- * Core and Course renderer inclusion page.
+ * A login page layout for the boost theme.
  *
  * @package   theme_trend
  * @copyright 2018 Allan Levitt || http://www.alevitt.co.za
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-defined('MOODLE_INTERNAL') || die();
+$bodyattributes = $OUTPUT->body_attributes();
 
-require_once('renderers/core_renderer.php');
-require_once('renderers/course_renderer.php');
+$templatecontext = [
+    'sitename' => format_string($SITE->shortname, true, ['context' => context_course::instance(SITEID), "escape" => false]),
+    'output' => $OUTPUT,
+    'bodyattributes' => $bodyattributes
+];
+
+echo $OUTPUT->render_from_template('theme_trend/login', $templatecontext);
+

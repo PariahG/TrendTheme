@@ -1,0 +1,191 @@
+// The Main CSS file for Trend. This is where the core layout and changes from Boost will be applied.
+
+// Base styles / defaults
+// -------------------------------------------------------------------------------------------------------------------
+body {
+    @include bg-lin-grad($gray-light3, $gray-lightest);
+}
+h1, h2, h3, h4, h5 {
+    color:$gray-dark;
+    font-weight:300;
+    font-family: 'Omnes';
+}
+p, span, li, div {
+    color:$gray-dark;
+    font-weight:200;
+    font-family: 'Omnes';    
+}
+a {
+    font-family: 'Omnes';
+    color:$brand-primary;
+    &:hover {
+        color:$gray-dark;
+        text-decoration: none;
+    }
+}
+
+$breadcrumb-divider: "|";
+
+#region-main-settings-menu.has-blocks, #region-main.has-blocks {
+    width:inherit;
+}
+// -------------------------------------------------------------------------------------------------------------------
+
+// Front page category list
+// -------------------------------------------------------------------------------------------------------------------
+#frontpage-category-names {
+    .subcategories {
+        @extend %grid;
+        @extend %grid-responsive;
+    }
+    .category {
+        @include main-radius(0);
+        @include anim-timing(0.2s);
+        background: $rollover;
+        text-align:center;
+        padding:0.4rem;
+        border: 0 solid;
+        border-color: $gray-lighter;
+        box-shadow: 0 0.1rem 0.5rem 0 $shadow-mid;
+        text-decoration: none;
+        .categoryname {
+            @extend %med-header-text;
+            @include anim-timing(0.2s);
+            color: $brand-primary;
+            background-image:none;
+            text-decoration: none;
+            padding:0.4rem 0;
+            border-color: $gray-lighter;
+        }
+        .content {
+            @extend %body-text;
+            @extend %display-responsive;
+            color: $gray-light;
+            padding:0.8rem 0.8rem 0 0.8rem;
+        }
+        .image {
+            @extend %display-responsive;
+            @include anim-timing(0.2s);
+            @include top-radius(0);
+            width:100%;
+            min-height:7rem;
+            max-height:10rem;
+            padding:0;
+            margin:0;
+            border:0;
+            overflow:hidden;
+            text-align:center;
+            img {
+                width:110%;
+                height:auto;
+                border:0;
+            }
+        }
+        &:hover, &:active {
+            @extend %cat-hover-responsive;
+            .image {
+                opacity: 0.6;
+            }
+            .categoryname {
+                @extend %catname-hover-responsive
+            }
+        }
+    }
+    // This is a hacky fix to remove the title on the home page. Will remove this with a custom front page template.
+    h2 {
+        display:none;
+    }
+}
+// -------------------------------------------------------------------------------------------------------------------
+
+// Sticky header || This is specific to the LexisNexis theme for now
+// -------------------------------------------------------------------------------------------------------------------
+.navbar-brand {
+    position:fixed;
+    left:2rem;
+    top:0;
+    height:7.5rem;
+    padding:0;
+    background-color:$brand-primary;
+    box-shadow: 0 0 0.5rem 0 $shadow-dark;
+    .logo {
+        padding:1.8rem 0 0 0;
+        margin:0 -0.9rem 0 -0.5rem;
+        img {
+            max-width:5rem;
+            min-width: 5rem;
+            min-height:5rem;
+            padding:0;
+            margin:0;
+        }
+    }
+}
+.btn-header {
+    margin-left:6.5rem;
+}
+[data-region="drawer"] {
+    @include bg-lin-grad($gray-light2, $gray-lighter);
+    padding: 5rem 2rem 2rem 2rem;
+}
+.header-closed {
+    margin-left:6.5rem;
+    @include anim-timing-no-ease(0.4s);
+}
+.header-open {
+    margin-left:0;
+    @include anim-timing-no-ease(0.4s);
+}
+// -------------------------------------------------------------------------------------------------------------------
+
+// Footer
+// -------------------------------------------------------------------------------------------------------------------
+// Block Region above the footer
+#custom-block-footer {
+    padding: 1rem 2rem 0 2rem;
+    @include bg-lin-grad($gray-light2, $gray-lighter);
+    .block-region {
+        @extend %grid;
+        @extend %grid-responsive;
+        .block {
+            box-shadow: 0 0.1rem 0.5rem 0 $shadow-light;
+        }
+        h2, h3, h4 {
+            border-bottom:1px solid $gray-lighter;
+            text-transform: capitalize;
+            color: $gray;
+        }
+    }
+}
+// Page footer
+#page-footer {
+    padding-left:2rem;  
+    padding-right:2rem;  
+    @extend %footer-bg;
+    .footer-container {
+        @extend %grid;
+        @extend %grid-footer-responsive;
+        background-color: rgba(255,255,255,1);
+        box-shadow: 0 0.1rem 0.5rem 0 $shadow-dark;
+    } 
+    h3, h4 {
+        padding-bottom:0.5rem;
+        border-bottom:0.1rem solid $gray-lighter;
+    }
+    p {
+        color:$gray-light;
+        margin:0;
+        padding:0;
+    }
+    .footer-link {
+        color:$brand-primary;
+        text-decoration: none;
+    }
+    a:hover {
+        color:$gray-dark;
+        text-decoration: none;
+    }
+    .footer-box {
+        padding:1rem;
+    }
+}
+// -------------------------------------------------------------------------------------------------------------------

@@ -15,31 +15,33 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Trend.
+ * 
  *
  * @package    theme_trend
  * @copyright  2018 Allan Levitt || http://www.alevitt.co.za/
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-// This line protects the file from being accessed by a URL directly.
+/**
+ * This file describes jQuery plugins available in the moodle
+ * core component. These can be included in page using:
+ *   $PAGE->requires->jquery();
+ *   $PAGE->requires->jquery_plugin('migrate', 'core');
+ *   $PAGE->requires->jquery_plugin('ui', 'core');
+ *   $PAGE->requires->jquery_plugin('ui-css', 'core');
+ *
+ * Please note that other moodle plugins can not use the sample
+ * jquery plugin names, only one is loaded if collision detected.
+ *
+ * Any Moodle plugin may add jquery/plugins.php and include extra
+ * jQuery plugins.
+ *
+ * Themes or other plugins may blacklist any jquery plugin,
+ * for example to override default jQueryUI theme.
+ */
+
 defined('MOODLE_INTERNAL') || die();
 
-// Trend's date of release.
-$plugin->version = 2018022700; // Year | Month | Day | Increment
-
-// Trend requires Moodle 3.4 or higher.
-$plugin->requires = 2017111300;
-
-$plugin->component = 'theme_trend';
-
-// This is the release number.
-$plugin->release = '0.1.0'; // Main | Minor | Increment
-
-// Trend's release maturity. Do not use ALPHA or BETA in production sites.
-$plugin->maturity = MATURITY_ALPHA;
-
-// Trend requires the Boost theme from 3.4 or higher.
-$plugin->dependencies = [
-    'theme_boost' => 2017111300
-];
+$plugins = array(
+    'accordion' => array('files' => array('accordion.js'))
+);
