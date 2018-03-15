@@ -123,13 +123,12 @@ if ($ADMIN->fulltree) {
     for ($i = 1; $i <= $catnum; $i++) {
         // Category image uploader.    
         $catname = trend_catname($i);
-        $catnospace = str_replace(' ', '', $catname);
-        $catformatname = strtolower($catnospace);
+        $catid =  trend_catid($i);
         
-        $name = 'theme_trend/catimage_'.$catformatname;
+        $name = 'theme_trend/catimage_'.$catid;
         $title = $catname.' category image';
         $description = 'Upload an image that will be used for the '.$catname.' category';
-        $setting = new admin_setting_configstoredfile($name, $title, $description, 'catimage_'.$catformatname);
+        $setting = new admin_setting_configstoredfile($name, $title, $description, 'catimage_'.$catid);
         $setting->set_updatedcallback('theme_trend_update_settings_images');
         $page->add($setting);
     }

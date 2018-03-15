@@ -320,8 +320,8 @@ class theme_trend_core_course_renderer extends core_course_renderer {
         $categorydesc = $chelper->get_category_formatted_description($coursecat);
         
         // New dynamic image generator.
-        $catname = strtolower(str_replace(' ','',$categoryname));
-        $catimg = trend_catimage($catname);
+        $catid = $coursecat->id;
+        $catimg = trend_catimage($catid);
         
         //Add the image to the output
         $content .= html_writer::start_tag('div', array('class' => 'image'));

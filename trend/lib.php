@@ -41,7 +41,6 @@ defined('MOODLE_INTERNAL') || die();
 function theme_trend_pluginfile($course, $cm, $context, $filearea, $args, $forcedownload, array $options = array()) {
     if ($context->contextlevel == CONTEXT_SYSTEM) {
         $theme = theme_config::load('trend');
-        // By default, theme files must be cache-able by both browsers and proxies.
         if (!array_key_exists('cacheability', $options)) {
             $options['cacheability'] = 'public';
         }
@@ -140,7 +139,7 @@ function theme_trend_update_settings_images($settingname) {
     } 
 
 /**
-     * Returns the name of the category based on the order in which they appear on the site.
+     * Returns the NAME of the category based on the order in which they appear on the site.
      * For use in the settings page ONLY. (Although can have limited use in FOR loops).
      *
      * @return string
@@ -154,12 +153,10 @@ function theme_trend_update_settings_images($settingname) {
         $entries = coursecat::make_categories_list();
         $count = 0;
         $namearray = array();
-        $numarray = array();
         
         foreach ($entries as $num => $entry) {
             $count ++;
-            $namearray[] = $entry; // this stores the category name. Deprecate this.
-            $numarray[] = $num; // this stores the category ID. Implement this.
+            $namearray[] = $entry;
         }
         
         if ($number != null) {
@@ -169,6 +166,35 @@ function theme_trend_update_settings_images($settingname) {
         }
         return $name;
     }
+
+/**
+     * Returns the ID of the category based on the order in which they appear on the site.
+     * For use in the settings page ONLY. (Although can have limited use in FOR loops).
+     *
+     * @return string
+     */
+    function trend_catid($number) {
+        global $CFG;
+        require_once($CFG->libdir. '/coursecatlib.php');
+                        
+        $chelper = new coursecat_helper();
+        
+        $entries = coursecat::make_categories_list();
+        $count = 0;
+        $numarray = array();
+        
+        foreach ($entries as $num => $entry) {
+            $count ++;
+            $numarray[] = $num;
+        }
+        
+        if ($number != null) {
+            $id = $numarray[$number - 1];
+        } else {
+            $id = '';
+        }
+        return $id;
+    }
     
     /**
      * Returns the image linked to the category that was uploaded in the settings page as a URL.
@@ -176,13 +202,13 @@ function theme_trend_update_settings_images($settingname) {
      *
      * @return URL
      */
-    function trend_catimage($catname) {
+    function trend_catimage($catid) {
         static $theme;
         if (empty($theme)) {
             $theme = theme_config::load('trend');
         }
         
-        $catimgsetting = 'catimage_'.$catname;
+        $catimgsetting = 'catimage_'.$catid;
         
         if (!empty($theme->settings->$catimgsetting)) {
             $url = $theme->setting_file_url($catimgsetting, $catimgsetting);
