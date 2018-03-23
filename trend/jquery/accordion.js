@@ -9,18 +9,20 @@ $(document).ready(function() {
      */
     var clickedTab;
     var sameTab = false;
+    
     $(".title").click(function(e) {
-        //Close all open tabs
-        $(".topics .title").removeClass("active");
-        $(".topics .content").slideUp(300);
-        $("#section-0 .content").stop();
         
         //Set clicked variable
         var currentAttrValue = $(this).attr("href");
         
+        //Close all open tabs
+        $(".section .title").removeClass("active");
+        $(".section .content").slideUp(300);
+        $("#section-0 .content").stop();
+        
         //Check if current clicked tab is the same as the previously clicked tab
         if(clickedTab === currentAttrValue){
-            $(".topics .title").removeClass("active");
+            $(".topics " + currentAttrValue + " .title").removeClass("active");
             $(".topics " + currentAttrValue + " .content").slideUp(300);
             
             //Revert clickedTab to not be equal to current tab

@@ -50,6 +50,16 @@ function theme_trend_pluginfile($course, $cm, $context, $filearea, $args, $force
     }
 }
 
+    /**
+     * Initialize page
+     * @param moodle_page $page
+     */
+    function theme_trend_page_init(moodle_page $page) {
+        global $CFG;
+        $page->requires->jquery();
+        $page->requires->jquery_plugin('accordion', 'theme_trend');
+    }
+
 /**
      * Creates the SCSS file
      *
@@ -139,41 +149,16 @@ function theme_trend_update_settings_images($settingname) {
     } 
 
 /**
-     * Returns the NAME of the category based on the order in which they appear on the site.
-     * For use in the settings page ONLY. (Although can have limited use in FOR loops).
+     * Returns the ID / NAME of the category based on the order in which they appear on the site.
+     * For use in the settings page ONLY.
+     * 
+     * @param $number is the iterated number from the FOR loop.
+     * @param $selecter should be chosen between 'name' and 'id'. ONLY those strings should be used.
+     * Defaults to ID if no parameter used.
      *
      * @return string
      */
-    function trend_catname($number) {
-        global $CFG;
-        require_once($CFG->libdir. '/coursecatlib.php');
-                        
-        $chelper = new coursecat_helper();
-        
-        $entries = coursecat::make_categories_list();
-        $count = 0;
-        $namearray = array();
-        
-        foreach ($entries as $num => $entry) {
-            $count ++;
-            $namearray[] = $entry;
-        }
-        
-        if ($number != null) {
-            $name = $namearray[$number - 1];
-        } else {
-            $name = '';
-        }
-        return $name;
-    }
-
-/**
-     * Returns the ID of the category based on the order in which they appear on the site.
-     * For use in the settings page ONLY. (Although can have limited use in FOR loops).
-     *
-     * @return string
-     */
-    function trend_catid($number) {
+    function trend_catid($number, $selecter = null) {
         global $CFG;
         require_once($CFG->libdir. '/coursecatlib.php');
                         
@@ -182,18 +167,35 @@ function theme_trend_update_settings_images($settingname) {
         $entries = coursecat::make_categories_list();
         $count = 0;
         $numarray = array();
+        $namearray = array();
+        if ($selecter == null) {
+            $selecter = 'id';
+        }
         
+        // Get the name and ID and add them to simple arrays
         foreach ($entries as $num => $entry) {
             $count ++;
             $numarray[] = $num;
+            $namearray[] = $entry;
         }
         
+        // Extract just the relevant name or ID
         if ($number != null) {
             $id = $numarray[$number - 1];
+            $name = $namearray[$number-1];
         } else {
             $id = '';
+            $name = '';
         }
-        return $id;
+        
+        // Select whether to return the name or ID
+        if ($selecter == 'id') {
+            $output = $id;
+        } else if ($selecter == 'name') {
+            $output = $name;
+        }
+        
+        return $output;
     }
     
     /**
@@ -215,5 +217,60 @@ function theme_trend_update_settings_images($settingname) {
         }
         
         return $url;
+        
+    }
+    
+    /**
+     * Returns a TRUE / NULL based on whether or not a user is enrolled in a course within the given category.
+     * Don't need to know which courses as the only important thing is the user is enrolled in at least 1 of them.
+     *
+     * @return BOOLEAN
+     */
+    function trend_catenrolled($catid) {
+        global $CFG;
+        global $USER;
+        require_once($CFG->libdir. '/coursecatlib.php');
+
+        $chelper = new coursecat_helper();
+        $bool = null;
+        $courselist = get_courses($catid);
+        
+        foreach ($courselist as $course) {
+            $id = $course->id;
+            $context = context_course::instance($id);
+            if (is_enrolled($context) || is_siteadmin()) {
+                $bool = true;
+            }
+        }
+        
+        return $bool;
+        
+    }    
+    
+    /**
+     * Returns the setting for visibility of a category or course therein as either a '1' for yes or a '0' for no.
+     * 
+     * @param $catid is the category ID.
+     * @param $course is null by default which selects the category view setting.
+     *      example -  trend_catview($catid);
+     * 
+     *      to call the course view setting instead, insert the string 'course' in the function.
+     *      example -  trend_catview($catid, 'course');
+     *
+     * @return string
+     */
+    function trend_catview($catid, $course = null) {
+        static $theme;
+        if (empty($theme)) {
+            $theme = theme_config::load('trend');
+        }
+        
+        $catviewsetting = 'cat'.$course.'view'.$catid;
+        
+        if (!empty($theme->settings->$catviewsetting)) {
+            $option = $theme->settings-$catviewsetting;
+        }
+        
+        return $option;
         
     }

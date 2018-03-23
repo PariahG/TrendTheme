@@ -67,7 +67,7 @@ $string['loginbackgroundimage_desc'] = 'An image that will be stretched to fill 
 // Category name test.                                                                                                                
 $string['categories'] = '';
 // The name of the third tab in the theme settings.                                                                                
-$string['addimages'] = 'Category images';
+$string['addimages'] = 'Category settings';
 
 $string['settingcatimage'] = ' category image';
 $string['settingcatselect'] = 'Select a Category';

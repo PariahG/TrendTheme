@@ -11,7 +11,7 @@ h1, h2, h3, h4, h5 {
     font-family: 'Omnes';
 }
 p, span, li, div {
-    color:$gray-dark;
+    color:$gray;
     font-weight:200;
     font-family: 'Omnes';    
 }
@@ -23,6 +23,19 @@ a {
         text-decoration: none;
     }
 }
+// Login Page
+.login-page {
+    background-image: url([[pix:theme|login-bg]]);
+    background-size:cover;
+    background-position: top left;
+    background-color: linear-gradient($gray-light3, $gray-lightest) fixed;
+    #page {
+        margin-top:0 !important;
+    }
+    .card {
+        background-color: rgba(255,255,255,0.9) !important;
+    }
+}
 
 $breadcrumb-divider: "|";
 
@@ -31,9 +44,9 @@ $breadcrumb-divider: "|";
 }
 // -------------------------------------------------------------------------------------------------------------------
 
-// Front page category list
+// Category list
 // -------------------------------------------------------------------------------------------------------------------
-#frontpage-category-names {
+#frontpage-category-names, .course_category_tree {
     .subcategories {
         @extend %grid;
         @extend %grid-responsive;
@@ -46,16 +59,18 @@ $breadcrumb-divider: "|";
         padding:0.4rem;
         border: 0 solid;
         border-color: $gray-lighter;
-        box-shadow: 0 0.1rem 0.5rem 0 $shadow-mid;
+        box-shadow: 0 0.1rem 0.3rem 0 $shadow-mid;
         text-decoration: none;
-        .categoryname {
-            @extend %med-header-text;
-            @include anim-timing(0.2s);
-            color: $brand-primary;
-            background-image:none;
-            text-decoration: none;
-            padding:0.4rem 0;
-            border-color: $gray-lighter;
+        .info {
+            .categoryname {
+                @extend %med-header-text;
+                @include anim-timing(0.2s);
+                color: $brand-primary;
+                background-image:none;
+                text-decoration: none;
+                padding:0.4rem 0;
+                border-color: $gray-lighter;
+            }            
         }
         .content {
             @extend %body-text;
@@ -91,9 +106,143 @@ $breadcrumb-divider: "|";
             }
         }
     }
-    // This is a hacky fix to remove the title on the home page. Will remove this with a custom front page template.
+    // This is a hacky fix to remove the title on the home page.
     h2 {
         display:none;
+    }
+}
+// -------------------------------------------------------------------------------------------------------------------
+
+// Category page (list of courses)
+// -------------------------------------------------------------------------------------------------------------------
+.course_category_tree {
+    .courses {
+        @extend %grid;
+        @extend %grid-responsive;
+        margin:0 0 1rem 0;
+        padding-bottom:1.5rem;
+        border-bottom:1px solid $brand-primary;
+        .coursebox {
+            @include main-radius(0);
+            @include anim-timing(0.2s);
+            background: $gray-light;
+            overflow: hidden;
+            text-align:center;
+            padding:1rem;
+            border: 0 solid;
+            border-color: $gray-lighter;
+            box-shadow: 0 0.1rem 0.1rem 0 $shadow-dark;
+            text-decoration: none;
+            .courseinfo {
+                padding:0;
+                .courseimage {
+                    width:3rem;
+                    min-height:3rem;
+                    padding:0.5rem 1rem 0.5rem 0;
+                    border-right:1px outset;
+                    border-color:$gray-lighter;
+                    margin:0 1rem 0 0;
+                    float:left;
+                    text-align:left;
+                    img {
+                        width:110%;
+                        height:auto;
+                        border:0;
+                    }
+                }
+                .coursename {
+                    font-size: 1.6rem;
+                    color: $rollover;
+                    padding:0;
+                    margin:0;
+                    text-align:left;
+                }
+            }
+            .enrolmenticons {
+                // Nothing here yet. In place in case enrolment icons are used in the future.
+            }
+            &:hover {
+                background:$brand-primary;
+                box-shadow: 0 0.1rem 0.4rem 0;
+            }
+        }
+    }
+}
+// This is for the category name and description
+.catlist-name {
+    margin:0;
+    padding:0 0 0.6rem 0;
+    border-bottom:1px solid $brand-primary;
+}
+#page-course-index-category .generalbox.info {
+    font-size:1.2rem;
+    margin-bottom:0;
+    border:0;
+    padding:0;
+    &.p-y-1 {
+        padding-top:1rem !important;
+        padding-bottom:0.2rem !important;
+    }
+}
+// -------------------------------------------------------------------------------------------------------------------
+
+// Topics Accordion
+// -------------------------------------------------------------------------------------------------------------------
+#page-content .topics .section {
+    .title {
+        @include anim-timing(0.3s);
+        background: url([[pix:theme|arrow-grey]]) no-repeat;
+        background-position:left center;
+        background-size:0.4rem;
+        border-bottom:1px solid;
+        border-color: $gray-lighter;
+        padding:0.8rem;
+        padding-left: 1.2rem;
+        margin-bottom:0.1rem;
+        cursor:pointer;
+        h3 {
+            @include anim-timing(0.2s);
+            padding:0;
+            margin:0;
+            color:$gray-light;
+        }
+        &:hover {
+            h3 {
+                color:$brand-primary;
+            }
+        }
+        &.active {
+            border-color: $brand-primary;
+            background: url([[pix:theme|arrow]]) no-repeat;
+            background-position:left center;
+            background-size:0.4rem;
+            h3 {
+                color: $gray-dark;
+            }
+        }
+    }
+    .content {
+        border-bottom:1px solid;
+        border-color:$rollover;
+        padding:0.3rem 0.8rem 0 1.2rem;
+        &.active {
+            border-color:$gray-lighter2;
+        }
+        ul.section {
+            margin:0 0 0.6rem 0;
+            padding-top:0;
+        }
+    }
+}
+// Specific first section overrides
+#section-0 {
+    .title {
+        display:none;
+    }
+    h3 {
+        margin:0 0 0.4rem 0;
+        padding:0 0 0.6rem 0;
+        border-bottom:1px solid $brand-primary;        
     }
 }
 // -------------------------------------------------------------------------------------------------------------------
@@ -107,7 +256,7 @@ $breadcrumb-divider: "|";
     height:7.5rem;
     padding:0;
     background-color:$brand-primary;
-    box-shadow: 0 0 0.5rem 0 $shadow-dark;
+    box-shadow: 0 0 0.3rem 0 $shadow-dark;
     .logo {
         padding:1.8rem 0 0 0;
         margin:0 -0.9rem 0 -0.5rem;

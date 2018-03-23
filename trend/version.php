@@ -26,7 +26,7 @@
 defined('MOODLE_INTERNAL') || die();
 
 // Trend's date of release.
-$plugin->version = 2018031501; // Year | Month | Day | Increment
+$plugin->version = 2018032300; // Year | Month | Day | Increment
 
 // Trend requires Moodle 3.4 or higher.
 $plugin->requires = 2017111300;
@@ -34,7 +34,7 @@ $plugin->requires = 2017111300;
 $plugin->component = 'theme_trend';
 
 // This is the release number.
-$plugin->release = '0.2.1'; // Main | Minor | Increment
+$plugin->release = '0.3.0'; // Main | Minor | Increment
 
 // Trend's release maturity. Do not use ALPHA or BETA in production sites.
 $plugin->maturity = MATURITY_ALPHA;

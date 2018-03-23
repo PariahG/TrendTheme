@@ -33,7 +33,9 @@ require_once($CFG->libdir . '/coursecatlib.php');
 
 class theme_trend_core_course_renderer extends core_course_renderer {
         
-    /**
+    /** DONE
+     * @TODO: grayed-out block for users who are not enrolled that sends an email to site support.
+     * 
      * Displays one course in the list of courses.
      *
      * This is an internal function, to display an information about just one course
@@ -47,6 +49,7 @@ class theme_trend_core_course_renderer extends core_course_renderer {
      */
     protected function coursecat_coursebox(coursecat_helper $chelper, $course, $additionalclasses = '') {
         global $CFG;
+        global $USER;
         if (!isset($this->strings->summary)) {
             $this->strings->summary = get_string('summary');
         }
@@ -59,86 +62,20 @@ class theme_trend_core_course_renderer extends core_course_renderer {
         }
         $content = '';
         $classes = trim('coursebox clearfix '. $additionalclasses);
-        if ($chelper->get_show_courses() >= self::COURSECAT_SHOW_COURSES_EXPANDED) {
-            $nametag = 'h3';
-        } else {
-            $classes .= ' collapsed';
-            $nametag = 'div';
-        }
+        $nametag = 'h3';
+        $coursename = $chelper->get_course_formatted_name($course);
+        $courselink = $CFG->wwwroot.'/course/view.php?id='.$course->id;
 
-        // .coursebox
-        $content .= html_writer::start_tag('div', array(
+        // .coursebox || Changed to a link so the entire box is the link.
+        $content .= html_writer::start_tag('a', array(
             'class' => $classes,
             'data-courseid' => $course->id,
             'data-type' => self::COURSECAT_TYPE_COURSE,
+            'href' => $courselink,
         ));
-
-        $content .= html_writer::start_tag('div', array('class' => 'info'));
-
-        // course name
-        $coursename = $chelper->get_course_formatted_name($course);
-        $coursenamelink = html_writer::link(new moodle_url('/course/view.php', array('id' => $course->id)),
-                                            $coursename, array('class' => $course->visible ? '' : 'dimmed'));
-        $content .= html_writer::tag($nametag, $coursenamelink, array('class' => 'coursename'));
-        // If we display course in collapsed form but the course has summary or course contacts, display the link to the info page.
-        $content .= html_writer::start_tag('div', array('class' => 'moreinfo'));
-        if ($chelper->get_show_courses() < self::COURSECAT_SHOW_COURSES_EXPANDED) {
-            if ($course->has_summary() || $course->has_course_contacts() || $course->has_course_overviewfiles()) {
-                $url = new moodle_url('/course/info.php', array('id' => $course->id));
-                $image = $this->output->pix_icon('i/info', $this->strings->summary);
-                $content .= html_writer::link($url, $image, array('title' => $this->strings->summary));
-                // Make sure JS file to expand course content is included.
-                $this->coursecat_include_js();
-            }
-        }
-        $content .= html_writer::end_tag('div'); // .moreinfo
-
-        // print enrolmenticons
-        if ($icons = enrol_get_course_info_icons($course)) {
-            $content .= html_writer::start_tag('div', array('class' => 'enrolmenticons'));
-            foreach ($icons as $pix_icon) {
-                $content .= $this->render($pix_icon);
-            }
-            $content .= html_writer::end_tag('div'); // .enrolmenticons
-        }
-
-        $content .= html_writer::end_tag('div'); // .info
-
-        $content .= html_writer::start_tag('div', array('class' => 'content'));
-        $content .= $this->coursecat_coursebox_content($chelper, $course);
-        $content .= html_writer::end_tag('div'); // .content
-
-        $content .= html_writer::end_tag('div'); // .coursebox
-        return $content;
-    }
-
-    /**
-     * Returns HTML to display course content (summary, course contacts and optionally category name)
-     *
-     * This method is called from coursecat_coursebox() and may be re-used in AJAX
-     *
-     * @param coursecat_helper $chelper various display options
-     * @param stdClass|course_in_list $course
-     * @return string
-     */
-    protected function coursecat_coursebox_content(coursecat_helper $chelper, $course) {
-        global $CFG;
-        if ($chelper->get_show_courses() < self::COURSECAT_SHOW_COURSES_EXPANDED) {
-            return '';
-        }
-        if ($course instanceof stdClass) {
-            require_once($CFG->libdir. '/coursecatlib.php');
-            $course = new course_in_list($course);
-        }
-        $content = '';
-
-        // display course summary
-        if ($course->has_summary()) {
-            $content .= html_writer::start_tag('div', array('class' => 'summary'));
-            $content .= $chelper->get_course_formatted_summary($course,
-                    array('overflowdiv' => true, 'noclean' => true, 'para' => false));
-            $content .= html_writer::end_tag('div'); // .summary
-        }
+        
+        // Image & Course name
+        $content .= html_writer::start_tag('div', array('class' => 'courseinfo'));
 
         // display course overview files
         $contentimages = $contentfiles = '';
@@ -151,139 +88,41 @@ class theme_trend_core_course_renderer extends core_course_renderer {
                 $contentimages .= html_writer::tag('div',
                         html_writer::empty_tag('img', array('src' => $url)),
                         array('class' => 'courseimage'));
+            }
+        }
+        $content .= $contentimages;
+
+        // course name
+        $content .= html_writer::tag($nametag, $coursename, array('class' => 'coursename'));
+        
+        //End courseinfo
+        $content .=html_writer::end_tag('div');
+
+        // print enrolmenticons
+        if ($icons = enrol_get_course_info_icons($course)) {
+            $content .= html_writer::start_tag('div', array('class' => 'enrolmenticons'));
+            foreach ($icons as $pix_icon) {
+                $content .= $this->render($pix_icon);
+            }
+            $content .= html_writer::end_tag('div'); // .enrolmenticons
+        }
+
+        $content .= html_writer::end_tag('a'); // .coursebox
+        
+        // If a user is not enrolled in a course, do not display that course
+        $catid = $course->category;
+        $context = context_course::instance($course->id);
+        if (!is_enrolled($context)) {
+            if (trend_catview($catid, 'course') == '1' || is_siteadmin()) {
+                $content .= '';
             } else {
-                $image = $this->output->pix_icon(file_file_icon($file, 24), $file->get_filename(), 'moodle');
-                $filename = html_writer::tag('span', $image, array('class' => 'fp-icon')).
-                        html_writer::tag('span', $file->get_filename(), array('class' => 'fp-filename'));
-                $contentfiles .= html_writer::tag('span',
-                        html_writer::link($url, $filename),
-                        array('class' => 'coursefile fp-filename-icon'));
+                $content = '';
             }
         }
-        $content .= $contentimages. $contentfiles;
-
-        // display course contacts. See course_in_list::get_course_contacts()
-        if ($course->has_course_contacts()) {
-            $content .= html_writer::start_tag('ul', array('class' => 'teachers'));
-            foreach ($course->get_course_contacts() as $userid => $coursecontact) {
-                $name = $coursecontact['rolename'].': '.
-                        html_writer::link(new moodle_url('/user/view.php',
-                                array('id' => $userid, 'course' => SITEID)),
-                            $coursecontact['username']);
-                $content .= html_writer::tag('li', $name);
-            }
-            $content .= html_writer::end_tag('ul'); // .teachers
-        }
-
-        // display course category if necessary (for example in search results)
-        if ($chelper->get_show_courses() == self::COURSECAT_SHOW_COURSES_EXPANDED_WITH_CAT) {
-            require_once($CFG->libdir. '/coursecatlib.php');
-            if ($cat = coursecat::get($course->category, IGNORE_MISSING)) {
-                $content .= html_writer::start_tag('div', array('class' => 'coursecat'));
-                $content .= get_string('category').': '.
-                        html_writer::link(new moodle_url('/course/index.php', array('categoryid' => $cat->id)),
-                                $cat->get_formatted_name(), array('class' => $cat->visible ? '' : 'dimmed'));
-                $content .= html_writer::end_tag('div'); // .coursecat
-            }
-        }
-
+        
         return $content;
     }
-
-    /**
-     * Renders the list of courses
-     *
-     * This is internal function, please use {@link core_course_renderer::courses_list()} or another public
-     * method from outside of the class
-     *
-     * If list of courses is specified in $courses; the argument $chelper is only used
-     * to retrieve display options and attributes, only methods get_show_courses(),
-     * get_courses_display_option() and get_and_erase_attributes() are called.
-     *
-     * @param coursecat_helper $chelper various display options
-     * @param array $courses the list of courses to display
-     * @param int|null $totalcount total number of courses (affects display mode if it is AUTO or pagination if applicable),
-     *     defaulted to count($courses)
-     * @return string
-     */
-    protected function coursecat_courses(coursecat_helper $chelper, $courses, $totalcount = null) {
-        global $CFG;
-        if ($totalcount === null) {
-            $totalcount = count($courses);
-        }
-        if (!$totalcount) {
-            // Courses count is cached during courses retrieval.
-            return '';
-        }
-
-        if ($chelper->get_show_courses() == self::COURSECAT_SHOW_COURSES_AUTO) {
-            // In 'auto' course display mode we analyse if number of courses is more or less than $CFG->courseswithsummarieslimit
-            if ($totalcount <= $CFG->courseswithsummarieslimit) {
-                $chelper->set_show_courses(self::COURSECAT_SHOW_COURSES_EXPANDED);
-            } else {
-                $chelper->set_show_courses(self::COURSECAT_SHOW_COURSES_COLLAPSED);
-            }
-        }
-
-        // prepare content of paging bar if it is needed
-        $paginationurl = $chelper->get_courses_display_option('paginationurl');
-        $paginationallowall = $chelper->get_courses_display_option('paginationallowall');
-        if ($totalcount > count($courses)) {
-            // there are more results that can fit on one page
-            if ($paginationurl) {
-                // the option paginationurl was specified, display pagingbar
-                $perpage = $chelper->get_courses_display_option('limit', $CFG->coursesperpage);
-                $page = $chelper->get_courses_display_option('offset') / $perpage;
-                $pagingbar = $this->paging_bar($totalcount, $page, $perpage,
-                        $paginationurl->out(false, array('perpage' => $perpage)));
-                if ($paginationallowall) {
-                    $pagingbar .= html_writer::tag('div', html_writer::link($paginationurl->out(false, array('perpage' => 'all')),
-                            get_string('showall', '', $totalcount)), array('class' => 'paging paging-showall'));
-                }
-            } else if ($viewmoreurl = $chelper->get_courses_display_option('viewmoreurl')) {
-                // the option for 'View more' link was specified, display more link
-                $viewmoretext = $chelper->get_courses_display_option('viewmoretext', new lang_string('viewmore'));
-                $morelink = html_writer::tag('div', html_writer::link($viewmoreurl, $viewmoretext),
-                        array('class' => 'paging paging-morelink'));
-            }
-        } else if (($totalcount > $CFG->coursesperpage) && $paginationurl && $paginationallowall) {
-            // there are more than one page of results and we are in 'view all' mode, suggest to go back to paginated view mode
-            $pagingbar = html_writer::tag('div', html_writer::link($paginationurl->out(false, array('perpage' => $CFG->coursesperpage)),
-                get_string('showperpage', '', $CFG->coursesperpage)), array('class' => 'paging paging-showperpage'));
-        }
-
-        // display list of courses
-        $attributes = $chelper->get_and_erase_attributes('courses');
-        $content = html_writer::start_tag('div', $attributes);
-
-        if (!empty($pagingbar)) {
-            $content .= $pagingbar;
-        }
-
-        $coursecount = 0;
-        foreach ($courses as $course) {
-            $coursecount ++;
-            $classes = ($coursecount%2) ? 'odd' : 'even';
-            if ($coursecount == 1) {
-                $classes .= ' first';
-            }
-            if ($coursecount >= count($courses)) {
-                $classes .= ' last';
-            }
-            $content .= $this->coursecat_coursebox($chelper, $course, $classes);
-        }
-
-        if (!empty($pagingbar)) {
-            $content .= $pagingbar;
-        }
-        if (!empty($morelink)) {
-            $content .= $morelink;
-        }
-
-        $content .= html_writer::end_tag('div'); // .courses
-        return $content;
-    }
-
+    
     /** DONE
      * Returns HTML to display a course category as a part of a tree
      *
@@ -297,52 +136,62 @@ class theme_trend_core_course_renderer extends core_course_renderer {
      */
     protected function coursecat_category(coursecat_helper $chelper, $coursecat, $depth) {        
         global $CFG;
+        $chelper = new coursecat_helper();
+        $catid = $coursecat->id;
         
         // open category tag
         $classes = array('category');
         if (empty($coursecat->visible)) {
             $classes[] = 'dimmed_category';
         }
-
-        // Converted the div tag to a link so the entire box is a link, rather than just the text.
-        $content = html_writer::start_tag('a', array(
-            'class' => join(' ', $classes),
-            'data-categoryid' => $coursecat->id,
-            'data-depth' => $depth,
-            'data-showcourses' => $chelper->get_show_courses(),
-            'data-type' => self::COURSECAT_TYPE_CATEGORY,
-            'href' => $CFG->wwwroot . '/course/index.php?categoryid=' . $coursecat->id,
-        ));
-
-        // category details
-        $chelper = new coursecat_helper();
-        $categoryname = $coursecat->get_formatted_name();
-        $categorydesc = $chelper->get_category_formatted_description($coursecat);
         
-        // New dynamic image generator.
-        $catid = $coursecat->id;
-        $catimg = trend_catimage($catid);
+        // If a user is enrolled in a course within the category, then create the category block.
+        if ((trend_catenrolled($catid) == true || trend_catview($catid) == '1') || is_siteadmin()) {
         
-        //Add the image to the output
-        $content .= html_writer::start_tag('div', array('class' => 'image'));
-        $content .= html_writer::empty_tag('img', array('src' => $catimg));
-        $content .= html_writer::end_tag('div');
-        $content .= html_writer::start_tag('div', array('class' => 'info'));
+            // Converted the div tag to a link so the entire box is a link.
+            $content = html_writer::start_tag('a', array(
+                'class' => join(' ', $classes),
+                'data-categoryid' => $coursecat->id,
+                'data-depth' => $depth,
+                'data-showcourses' => $chelper->get_show_courses(),
+                'data-type' => self::COURSECAT_TYPE_CATEGORY,
+                'href' => $CFG->wwwroot . '/course/index.php?categoryid=' . $coursecat->id,
+            ));
 
-        $content .= html_writer::tag(($depth > 1) ? 'h4' : 'h3', $categoryname, array('class' => 'categoryname'));
+            // Category details
+            $categoryname = $coursecat->get_formatted_name();
+            $categorydesc = $chelper->get_category_formatted_description($coursecat);
+
+            // Get the image URL that was uploaded in the settings page.
+            $catimg = trend_catimage($catid);
+
+            // Add the image to the output
+            $content .= html_writer::start_tag('div', array('class' => 'image'));
+            $content .= html_writer::empty_tag('img', array('src' => $catimg));
+            $content .= html_writer::end_tag('div');
+
+            // This adds the Category name
+            $content .= html_writer::start_tag('div', array('class' => 'info'));
+
+            $content .= html_writer::tag(($depth > 1) ? 'h4' : 'h3', $categoryname, array('class' => 'categoryname'));
+
+            $content .= html_writer::end_tag('div'); // .info
+
+            // Add category description to the output
+            $content .= html_writer::tag('div', $categorydesc, array('class' => 'content'));
+
+            $content .= html_writer::end_tag('a'); // .category
         
-        $content .= html_writer::end_tag('div'); // .info
-
-        // add category description to the output
-        $content .= html_writer::tag('div', $categorydesc, array('class' => 'content'));
-
-        $content .= html_writer::end_tag('a'); // .category
-
+        // If the user is not enrolled in a course within the category, don't create the category block.
+        } else {
+            $content = '';
+        }
+        
         // Return the course category tree HTML
         return $content;
     }
 
-    /**
+    /** DONE
      * Returns HTML to display a tree of subcategories and courses in the given category
      *
      * @param coursecat_helper $chelper various display options
@@ -370,7 +219,7 @@ class theme_trend_core_course_renderer extends core_course_renderer {
         return $content;
     }
 
-    /**
+    /** DONE
      * Renders HTML to display particular course category - list of it's subcategories and courses
      *
      * Invoked from /course/index.php
@@ -406,21 +255,13 @@ class theme_trend_core_course_renderer extends core_course_renderer {
                 $title .= ": ". $coursecat->get_formatted_name();
             }
             $this->page->set_title($title);
+        }                
 
-            // Print the category selector
-            if (coursecat::count_all() > 1) {
-                $output .= html_writer::start_tag('div', array('class' => 'categorypicker'));
-                $select = new single_select(new moodle_url('/course/index.php'), 'categoryid',
-                        coursecat::make_categories_list(), $coursecat->id, null, 'switchcategory');
-                $select->set_label(get_string('categories').':');
-                $output .= $this->render($select);
-                $output .= html_writer::end_tag('div'); // .categorypicker
-            }
-        }
-
-        // Print current category description
+        // Print current category name & description
         $chelper = new coursecat_helper();
         if ($description = $chelper->get_category_formatted_description($coursecat)) {
+            $catname = $coursecat->get_formatted_name();
+            $output .= html_writer::tag('h1',$catname, array('class' => 'catlist-name'));
             $output .= $this->box($description, array('class' => 'generalbox info'));
         }
 
@@ -460,8 +301,10 @@ class theme_trend_core_course_renderer extends core_course_renderer {
             $catdisplayoptions['viewmoreurl'] = new moodle_url($baseurl, array('browse' => 'categories', 'page' => 1));
         }
         $chelper->set_courses_display_options($coursedisplayoptions)->set_categories_display_options($catdisplayoptions);
+        
         // Add course search form.
-        $output .= $this->course_search_form();
+        // This is removed for now. Perhaps will be needed in future.
+//        $output .= $this->course_search_form();
 
         // Display course category tree.
         $output .= $this->coursecat_tree($chelper, $coursecat);
@@ -470,13 +313,11 @@ class theme_trend_core_course_renderer extends core_course_renderer {
         $output .= $this->container_start('buttons');
         $context = get_category_or_system_context($coursecat->id);
         if (has_capability('moodle/course:create', $context)) {
-            // Print link to create a new course, for the 1st available category.
+            // Print link to create a new course, for the current category.
             if ($coursecat->id) {
                 $url = new moodle_url('/course/edit.php', array('category' => $coursecat->id, 'returnto' => 'category'));
-            } else {
-                $url = new moodle_url('/course/edit.php', array('category' => $CFG->defaultrequestcategory, 'returnto' => 'topcat'));
+                $output .= $this->single_button($url, get_string('addnewcourse'), 'get');
             }
-            $output .= $this->single_button($url, get_string('addnewcourse'), 'get');
         }
         ob_start();
         if (coursecat::count_all() == 1) {
@@ -491,107 +332,8 @@ class theme_trend_core_course_renderer extends core_course_renderer {
         return $output;
     }
 
-    /**
-     * Returns HTML to print list of courses user is enrolled to for the frontpage
-     *
-     * Also lists remote courses or remote hosts if MNET authorisation is used
-     *
-     * @return string
-     */
-    public function frontpage_my_courses() {
-        global $USER, $CFG, $DB;
-
-        if (!isloggedin() or isguestuser()) {
-            return '';
-        }
-
-        $output = '';
-        if (!empty($CFG->navsortmycoursessort)) {
-            // sort courses the same as in navigation menu
-            $sortorder = 'visible DESC,'. $CFG->navsortmycoursessort.' ASC';
-        } else {
-            $sortorder = 'visible DESC,sortorder ASC';
-        }
-        $courses  = enrol_get_my_courses('summary, summaryformat', $sortorder);
-        $rhosts   = array();
-        $rcourses = array();
-        if (!empty($CFG->mnet_dispatcher_mode) && $CFG->mnet_dispatcher_mode==='strict') {
-            $rcourses = get_my_remotecourses($USER->id);
-            $rhosts   = get_my_remotehosts();
-        }
-
-        if (!empty($courses) || !empty($rcourses) || !empty($rhosts)) {
-
-            $chelper = new coursecat_helper();
-            if (count($courses) > $CFG->frontpagecourselimit) {
-                // There are more enrolled courses than we can display, display link to 'My courses'.
-                $totalcount = count($courses);
-                $courses = array_slice($courses, 0, $CFG->frontpagecourselimit, true);
-                $chelper->set_courses_display_options(array(
-                        'viewmoreurl' => new moodle_url('/my/'),
-                        'viewmoretext' => new lang_string('mycourses')
-                    ));
-            } else {
-                // All enrolled courses are displayed, display link to 'All courses' if there are more courses in system.
-                $chelper->set_courses_display_options(array(
-                        'viewmoreurl' => new moodle_url('/course/index.php'),
-                        'viewmoretext' => new lang_string('fulllistofcourses')
-                    ));
-                $totalcount = $DB->count_records('course') - 1;
-            }
-            $chelper->set_show_courses(self::COURSECAT_SHOW_COURSES_EXPANDED)->
-                    set_attributes(array('class' => 'frontpage-course-list-enrolled'));
-            $output .= $this->coursecat_courses($chelper, $courses, $totalcount);
-
-            // MNET
-            if (!empty($rcourses)) {
-                // at the IDP, we know of all the remote courses
-                $output .= html_writer::start_tag('div', array('class' => 'courses'));
-                foreach ($rcourses as $course) {
-                    $output .= $this->frontpage_remote_course($course);
-                }
-                $output .= html_writer::end_tag('div'); // .courses
-            } elseif (!empty($rhosts)) {
-                // non-IDP, we know of all the remote servers, but not courses
-                $output .= html_writer::start_tag('div', array('class' => 'courses'));
-                foreach ($rhosts as $host) {
-                    $output .= $this->frontpage_remote_host($host);
-                }
-                $output .= html_writer::end_tag('div'); // .courses
-            }
-        }
-        return $output;
-    }
-
-    /**
-     * Returns HTML to print list of available courses for the frontpage
-     *
-     * @return string
-     */
-    public function frontpage_available_courses() {
-        global $CFG;
-        require_once($CFG->libdir. '/coursecatlib.php');
-
-        $chelper = new coursecat_helper();
-        $chelper->set_show_courses(self::COURSECAT_SHOW_COURSES_EXPANDED)->
-                set_courses_display_options(array(
-                    'recursive' => true,
-                    'limit' => $CFG->frontpagecourselimit,
-                    'viewmoreurl' => new moodle_url('/course/index.php'),
-                    'viewmoretext' => new lang_string('fulllistofcourses')));
-
-        $chelper->set_attributes(array('class' => 'frontpage-course-list-all'));
-        $courses = coursecat::get(0)->get_courses($chelper->get_courses_display_options());
-        $totalcount = coursecat::get(0)->get_courses_count($chelper->get_courses_display_options());
-        if (!$totalcount && !$this->page->user_is_editing() && has_capability('moodle/course:create', context_system::instance())) {
-            // Print link to create a new course, for the 1st available category.
-            return $this->add_new_course_button();
-        }
-        return $this->coursecat_courses($chelper, $courses, $totalcount);
-    }
-
-    /**
-     * Returns HTML to print tree with course categories and courses for the frontpage
+    /** DONE
+     * Returns HTML to print tree with course categories for the frontpage. No courses should display.
      *
      * @return string
      */
@@ -605,17 +347,12 @@ class theme_trend_core_course_renderer extends core_course_renderer {
                 'viewmoreurl' => new moodle_url('/course/index.php',
                         array('browse' => 'categories', 'page' => 1))
             ))->
-            set_courses_display_options(array(
-                'limit' => $CFG->coursesperpage,
-                'viewmoreurl' => new moodle_url('/course/index.php',
-                        array('browse' => 'courses', 'page' => 1))
-            ))->
-            set_attributes(array('class' => 'frontpage-category-combo'));
+            set_attributes(array('class' => 'frontpage-category-names'));
         return $this->coursecat_tree($chelper, coursecat::get(0));
     }
 
-    /**
-     * Returns HTML to print tree of course categories (with number of courses) for the frontpage
+    /** DONE
+     * Returns HTML to print tree of course categories for the frontpage
      *
      * @return string
      */
@@ -624,7 +361,6 @@ class theme_trend_core_course_renderer extends core_course_renderer {
         require_once($CFG->libdir. '/coursecatlib.php');
         $chelper = new coursecat_helper();
         $chelper->set_subcat_depth($CFG->maxcategorydepth)->
-                set_show_courses(self::COURSECAT_SHOW_COURSES_COUNT)->
                 set_categories_display_options(array(
                     'limit' => $CFG->coursesperpage,
                     'viewmoreurl' => new moodle_url('/course/index.php',
@@ -636,52 +372,25 @@ class theme_trend_core_course_renderer extends core_course_renderer {
     
 } // End of Class
 
-class theme_trend_format_topics_renderer extends \format_topics_renderer { 
+class theme_trend_format_topics_renderer extends format_topics_renderer { 
     
-    /**
+    /** DONE
      * Generate the starting container html for a list of sections
      * @return string HTML to output.
      */
     protected function start_section_list() {
-        return html_writer::start_tag('ul', array('class' => 'topics'));
+        return html_writer::start_tag('div', array('class' => 'topics'));
     }
 
-    /**
+    /** DONE
      * Generate the closing container html for a list of sections
      * @return string HTML to output.
      */
     protected function end_section_list() {
-        return html_writer::end_tag('ul');
+        return html_writer::end_tag('div');
     }
 
-    /**
-     * Generate the section title, wraps it in a link to the section page if page is to be displayed on a separate page
-     *
-     * @param stdClass $section The course_section entry from DB
-     * @param stdClass $course The course entry from DB
-     * @return string HTML to output.
-     */
-    public function section_title($section, $course) {
-        $title = get_section_name($course, $section);
-        $url = course_get_url($course, $section->section, array('navigation' => true));
-        if ($url) {
-            $title = html_writer::link($url, $title);
-        }
-        return $title;
-    }
-
-    /**
-     * Generate the section title to be displayed on the section page, without a link
-     *
-     * @param stdClass $section The course_section entry from DB
-     * @param stdClass $course The course entry from DB
-     * @return string HTML to output.
-     */
-    public function section_title_without_link($section, $course) {
-        return get_section_name($course, $section);
-    }
-
-    /**
+    /** DONE
      * Generate the display of the header part of a section before
      * course modules are included
      *
@@ -708,9 +417,25 @@ class theme_trend_format_topics_renderer extends \format_topics_renderer {
             }
         }
 
-        $o.= html_writer::start_tag('li', array('id' => 'section-'.$section->section,
-            'class' => 'section main clearfix'.$sectionstyle, 'role'=>'region',
+        $o.= html_writer::start_tag('div', array('id' => 'section-'.$section->section,
+            'class' => 'section mainclearfix'.$sectionstyle, 'role'=>'region',
             'aria-label'=> get_section_name($course, $section)));
+
+        // When not on a section page, we display the section titles except the general section if null
+        $hasnamenotsecpg = (!$onsectionpage && ($section->section != 0 || !is_null($section->name)));
+
+        // When on a section page, we only display the general section title, if title is not the default one
+        $hasnamesecpg = ($onsectionpage && ($section->section == 0 && !is_null($section->name)));
+
+        $classes = ' accesshide title';
+        if ($hasnamenotsecpg || $hasnamesecpg) {
+            $classes = ' title';
+        }
+        
+        // New section title to allow the accordian to function correctly
+        $o .= html_writer::start_tag('div', array('class' => $classes, 'href' => '#section-'.$section->section));
+        $o .= html_writer::tag('h3', $this->section_title($section, $course));
+        $o .= html_writer::end_tag('div');
 
         // Create a span that contains the section title to be used to create the keyboard section move menu.
         $o .= html_writer::tag('span', get_section_name($course, $section), array('class' => 'hidden sectionname'));
@@ -720,20 +445,13 @@ class theme_trend_format_topics_renderer extends \format_topics_renderer {
 
         $rightcontent = $this->section_right_content($section, $course, $onsectionpage);
         $o.= html_writer::tag('div', $rightcontent, array('class' => 'right side'));
-        $o.= html_writer::start_tag('div', array('class' => 'content'));
-
-        // When not on a section page, we display the section titles except the general section if null
-        $hasnamenotsecpg = (!$onsectionpage && ($section->section != 0 || !is_null($section->name)));
-
-        // When on a section page, we only display the general section title, if title is not the default one
-        $hasnamesecpg = ($onsectionpage && ($section->section == 0 && !is_null($section->name)));
-
-        $classes = ' accesshide';
-        if ($hasnamenotsecpg || $hasnamesecpg) {
-            $classes = '';
+        
+        // This is to hide every section except the first by default. This is for the accordion.
+        if ($section->section != 0) {
+            $display = 'display:none;';
         }
-        $sectionname = html_writer::tag('span', $this->section_title($section, $course));
-        $o.= $this->output->heading($sectionname, 3, 'sectionname' . $classes);
+        
+        $o.= html_writer::start_tag('div', array('class' => 'content', 'style' => $display));
 
         $o .= $this->section_availability($section);
 
@@ -744,21 +462,21 @@ class theme_trend_format_topics_renderer extends \format_topics_renderer {
         return $o;
     }
 
-    /**
+    /** DONE
      * Generate the display of the footer part of a section
      *
      * @return string HTML to output.
      */
     protected function section_footer() {
         $o = html_writer::end_tag('div'); // Content
-        $o.= html_writer::end_tag('li'); // Section Main
+        $o.= html_writer::end_tag('div'); // Section Main
 
         return $o;
     }
     
 } // End of Class
 
-class theme_trend_format_weeks_renderer extends \format_weeks_renderer {
+class theme_trend_format_weeks_renderer extends format_weeks_renderer {
     
     /**
      * Generate the starting container html for a list of sections
