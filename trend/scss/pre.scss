@@ -76,12 +76,13 @@ $breadcrumb-divider: "/" !default;
 $breadcrumb-divider-rtl: "/" !default;
 // -------------------------------------------------------------------------------------------------------------------
 
-// Variables
+// New Variables
 // -------------------------------------------------------------------------------------------------------------------
 $gray-light2:           #dedede !default;
 $gray-light3:           #e9e9e9 !default;  
 $gray-lighter2:       #f0f0f0 !default;  
 $rollover:                 #fff !default;
+$brand-secondary:             #939598 !default;
 $shadow-light:      rgba(0,0,0,0.1) !default;
 $shadow-mid:       rgba(0,0,0,0.3) !default;
 $shadow-dark:      rgba(0,0,0,0.6) !default;
@@ -89,6 +90,7 @@ $25_div:                    (100% - 3rem) / 4;
 $33_div:                    (100% - 2rem) / 3;
 $50_div:                    (100% - 1rem) / 2;
 $66_div:                    $33_div * 2;
+$login-bg:                  url([[pix:theme_trend|loginbackgroundimage]]) !default;
 // -------------------------------------------------------------------------------------------------------------------
 
 // Base classes
@@ -163,6 +165,9 @@ $66_div:                    $33_div * 2;
 %2-grid-layout-b {
         grid-template-columns: $50_div $50_div;
 }
+%2-grid-layout-c {
+        grid-template-columns: $33_div $66_div;
+}
 %1-grid-layout {
         grid-template-columns: $50_div * 2;
 }
@@ -181,18 +186,30 @@ $66_div:                    $33_div * 2;
     %display-responsive {
         display: block;
     }
+    %search-width {
+        width:60%;
+    }
+    %search-field-width {
+        min-width: 15rem;
+    }
 }
 // -------------------------------------------------------------------------------------------------------------------
 // Medium window
 @media (min-width: 768px) and (max-width: 1199px) { 
     %grid-responsive {
-        grid-template-columns: $33_div $33_div $33_div;
+        grid-template-columns: $50_div $50_div;
     }
     %grid-footer-responsive {
-        grid-template-columns: $33_div $33_div $33_div;
+        grid-template-columns: $50_div $50_div;
     }
     %display-responsive {
         display: block;
+    }
+    %search-width {
+        width:45%;
+    }
+    %search-field-width {
+        min-width: 11rem;
     }
 }
 // -------------------------------------------------------------------------------------------------------------------

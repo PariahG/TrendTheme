@@ -34,11 +34,12 @@ class theme_trend_core_renderer extends theme_boost\output\core_renderer {
     protected $language = null;
 
     /**
-     * Wrapper for header elements.
+     * Starting wrapper for header elements.
+     * This is done in order to include the header blocks region in the correct location.
      *
      * @return string HTML to display the main header.
      */
-    public function full_header() {
+    public function start_header() {
         global $PAGE;
 
         $html = html_writer::start_tag('header', array('id' => 'page-header', 'class' => 'row'));
@@ -49,7 +50,18 @@ class theme_trend_core_renderer extends theme_boost\output\core_renderer {
         $html .= html_writer::end_div();
         $html .= html_writer::tag('div', $this->course_header(), array('id' => 'course-header'));
         $html .= html_writer::end_div();
-        $html .= html_writer::end_tag('header');
+        return $html;
+    }
+
+    /**
+     * Closing wrapper for header elements.
+     *
+     * @return string HTML to display the main header.
+     */
+    public function end_header() {
+        global $PAGE;
+        
+        $html = html_writer::end_tag('header');
         return $html;
     }
     
@@ -140,16 +152,65 @@ class theme_trend_core_renderer extends theme_boost\output\core_renderer {
     }    
     
     /**
-     *  Footer custom blocks region
-     *  Need to figure out how to do this!!!
-     * 
+     *  Footer contact region
+     *  
+     * Calls the footer info from settings and renders the contact info.
      * 
      */
-    public function footer_blocks() {
+    public function footer_contact() {
         global $OUTPUT;
-                
-        echo $OUTPUT->blocks('side-pre');
         
+        // Get the image locations for the icons
+        $mailicon = $OUTPUT->image_url('icons/mail', 'theme_trend');
+        $phoneicon = $OUTPUT->image_url('icons/phone', 'theme_trend');
+        
+        // Retrieve the contact info
+        $email = trend_footer_info(MAIL);
+        $phone = trend_footer_info(PHONE);
+
+        $html = html_writer::tag('h4', 'Contact Us', null);
+        $html .= html_writer::start_tag('p');
+        $html .= html_writer::empty_tag('img', array('src' => $mailicon, 'class' => 'footer-icon'));
+        $html .= html_writer::tag('a', $email, array('href' => 'mailto:' . $email, 'class' => 'footer-link'));
+        $html .= html_writer::end_tag('p');
+        $html .= html_writer::start_tag('p');
+        $html .= html_writer::empty_tag('img', array('src' => $phoneicon, 'class' => 'footer-icon'));
+        $html .= html_writer::tag('span', $phone, array('class' => 'footer-link'));
+        $html .= html_writer::end_tag('p');
+        
+        return $html;        
+    }  
+    
+    /**
+     *  Footer copyright info
+     *  
+     * Calls the copyright info from settings and renders the relevant footer area.
+     * 
+     */
+    public function footer_copy() {
+        global $OUTPUT;
+        
+        // Retrieve the copyright info
+        $info = trend_footer_info(COPY);
+
+        $html = html_writer::tag('div', $info, array('class' => 'footer-copyright'));
+        
+        return $html;        
+    }
+
+    /**
+     * Render the login page template.
+     * @param \core_auth\output\login $form
+     * @return type|string
+     */
+    public function render_login(\core_auth\output\login $form) {
+        global $CFG, $PAGE, $SITE, $OUTPUT;
+        $context = $form->export_for_template($this);
+        // Override because rendering is not supported in template yet.
+        $context->cookieshelpiconformatted = $this->help_icon('cookiesenabled');
+        $context->errorformatted = $this->error_text($context->error);
+        $maincontent = $this->render_from_template('theme_trend/loginform', $context);
+        return  $maincontent;
     }
     
 } // End of Class

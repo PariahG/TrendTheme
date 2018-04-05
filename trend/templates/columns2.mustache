@@ -67,7 +67,9 @@
 
     <div id="page" class="container-fluid">
         <div id="new-header" class="{{#navdraweropen}}header-open{{/navdraweropen}} {{^navdraweropen}}header-closed{{/navdraweropen}}">
-        {{{ output.full_header }}}
+        {{{ output.start_header }}}
+            {{{ headerblocks }}}
+        {{{ output.end_header }}}
         </div>
 
         {{{ output.nav_trend }}}
@@ -75,11 +77,11 @@
         <div id="page-content" class="row">
             <div id="region-main-box" class="col-xs-12">
                 {{#hasregionmainsettingsmenu}}
-                <div id="region-main-settings-menu" class="hidden-print {{#hasblocks}}has-blocks{{/hasblocks}}">
+                <div id="region-main-settings-menu" class="hidden-print">
                     <div> {{{ output.region_main_settings_menu }}} </div>
                 </div>
                 {{/hasregionmainsettingsmenu}}
-                <section id="region-main" {{#hasblocks}}class="has-blocks"{{/hasblocks}}>
+                <section id="region-main">
                     <div class="card card-block">
                     {{#hasregionmainsettingsmenu}}
                         <div class="region_main_settings_menu_proxy"></div>

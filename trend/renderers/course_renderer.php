@@ -48,8 +48,7 @@ class theme_trend_core_course_renderer extends core_course_renderer {
      * @return string
      */
     protected function coursecat_coursebox(coursecat_helper $chelper, $course, $additionalclasses = '') {
-        global $CFG;
-        global $USER;
+        global $CFG, $USER;
         if (!isset($this->strings->summary)) {
             $this->strings->summary = get_string('summary');
         }
@@ -120,6 +119,100 @@ class theme_trend_core_course_renderer extends core_course_renderer {
             }
         }
         
+        return $content;
+    }
+
+    /**
+     * Renders the list of courses
+     *
+     * This is internal function, please use {@link core_course_renderer::courses_list()} or another public
+     * method from outside of the class
+     *
+     * If list of courses is specified in $courses; the argument $chelper is only used
+     * to retrieve display options and attributes, only methods get_show_courses(),
+     * get_courses_display_option() and get_and_erase_attributes() are called.
+     *
+     * @param coursecat_helper $chelper various display options
+     * @param array $courses the list of courses to display
+     * @param int|null $totalcount total number of courses (affects display mode if it is AUTO or pagination if applicable),
+     *     defaulted to count($courses)
+     * @return string
+     */
+    protected function coursecat_courses(coursecat_helper $chelper, $courses, $totalcount = null) {
+        global $CFG;
+        if ($totalcount === null) {
+            $totalcount = count($courses);
+        }
+        if (!$totalcount) {
+            // Courses count is cached during courses retrieval.
+            return '';
+        }
+
+        if ($chelper->get_show_courses() == self::COURSECAT_SHOW_COURSES_AUTO) {
+            // In 'auto' course display mode we analyse if number of courses is more or less than $CFG->courseswithsummarieslimit
+            if ($totalcount <= $CFG->courseswithsummarieslimit) {
+                $chelper->set_show_courses(self::COURSECAT_SHOW_COURSES_EXPANDED);
+            } else {
+                $chelper->set_show_courses(self::COURSECAT_SHOW_COURSES_COLLAPSED);
+            }
+        }
+
+        // prepare content of paging bar if it is needed
+        $paginationurl = $chelper->get_courses_display_option('paginationurl');
+        $paginationallowall = $chelper->get_courses_display_option('paginationallowall');
+        if ($totalcount > count($courses)) {
+            // there are more results that can fit on one page
+            if ($paginationurl) {
+                // the option paginationurl was specified, display pagingbar
+                $perpage = $chelper->get_courses_display_option('limit', $CFG->coursesperpage);
+                $page = $chelper->get_courses_display_option('offset') / $perpage;
+                $pagingbar = $this->paging_bar($totalcount, $page, $perpage,
+                        $paginationurl->out(false, array('perpage' => $perpage)));
+                if ($paginationallowall) {
+                    $pagingbar .= html_writer::tag('div', html_writer::link($paginationurl->out(false, array('perpage' => 'all')),
+                            get_string('showall', '', $totalcount)), array('class' => 'paging paging-showall'));
+                }
+            } else if ($viewmoreurl = $chelper->get_courses_display_option('viewmoreurl')) {
+                // the option for 'View more' link was specified, display more link
+                $viewmoretext = $chelper->get_courses_display_option('viewmoretext', new lang_string('viewmore'));
+                $morelink = html_writer::tag('div', html_writer::link($viewmoreurl, $viewmoretext),
+                        array('class' => 'paging paging-morelink'));
+            }
+        } else if (($totalcount > $CFG->coursesperpage) && $paginationurl && $paginationallowall) {
+            // there are more than one page of results and we are in 'view all' mode, suggest to go back to paginated view mode
+            $pagingbar = html_writer::tag('div', html_writer::link($paginationurl->out(false, array('perpage' => $CFG->coursesperpage)),
+                get_string('showperpage', '', $CFG->coursesperpage)), array('class' => 'paging paging-showperpage'));
+        }
+
+        // display list of courses
+        $attributes = $chelper->get_and_erase_attributes('courses');
+        $content = html_writer::start_tag('div', $attributes);
+
+        if (!empty($pagingbar)) {
+            $content .= $pagingbar;
+        }
+
+        $coursecount = 0;
+        foreach ($courses as $course) {
+            $coursecount ++;
+            $classes = ($coursecount%2) ? 'odd' : 'even';
+            if ($coursecount == 1) {
+                $classes .= ' first';
+            }
+            if ($coursecount >= count($courses)) {
+                $classes .= ' last';
+            }
+            $content .= $this->coursecat_coursebox($chelper, $course, $classes);
+        }
+
+        if (!empty($pagingbar)) {
+            $content .= $pagingbar;
+        }
+        if (!empty($morelink)) {
+            $content .= $morelink;
+        }
+
+        $content .= html_writer::end_tag('div'); // .courses
         return $content;
     }
     
@@ -330,6 +423,105 @@ class theme_trend_core_course_renderer extends core_course_renderer {
         $output .= $this->container_end();
 
         return $output;
+    }
+
+    /**
+     * Returns HTML to print list of courses user is enrolled to for the frontpage
+     *
+     * Also lists remote courses or remote hosts if MNET authorisation is used
+     *
+     * @return string
+     */
+    public function frontpage_my_courses() {
+        global $USER, $CFG, $DB;
+
+        if (!isloggedin() or isguestuser()) {
+            return '';
+        }
+
+        $output = '';
+        if (!empty($CFG->navsortmycoursessort)) {
+            // sort courses the same as in navigation menu
+            $sortorder = 'visible DESC,'. $CFG->navsortmycoursessort.' ASC';
+        } else {
+            $sortorder = 'visible DESC,sortorder ASC';
+        }
+        $courses  = enrol_get_my_courses('summary, summaryformat', $sortorder);
+        $rhosts   = array();
+        $rcourses = array();
+        if (!empty($CFG->mnet_dispatcher_mode) && $CFG->mnet_dispatcher_mode==='strict') {
+            $rcourses = get_my_remotecourses($USER->id);
+            $rhosts   = get_my_remotehosts();
+        }
+
+        if (!empty($courses) || !empty($rcourses) || !empty($rhosts)) {
+
+            $chelper = new coursecat_helper();
+            if (count($courses) > $CFG->frontpagecourselimit) {
+                // There are more enrolled courses than we can display, display link to 'My courses'.
+                $totalcount = count($courses);
+                $courses = array_slice($courses, 0, $CFG->frontpagecourselimit, true);
+                $chelper->set_courses_display_options(array(
+                        'viewmoreurl' => new moodle_url('/my/'),
+                        'viewmoretext' => new lang_string('mycourses')
+                    ));
+            } else {
+                // All enrolled courses are displayed, display link to 'All courses' if there are more courses in system.
+                $chelper->set_courses_display_options(array(
+                        'viewmoreurl' => new moodle_url('/course/index.php'),
+                        'viewmoretext' => new lang_string('fulllistofcourses')
+                    ));
+                $totalcount = $DB->count_records('course') - 1;
+            }
+            $chelper->set_show_courses(self::COURSECAT_SHOW_COURSES_EXPANDED)->
+                    set_attributes(array('class' => 'frontpage-course-list-enrolled'));
+            $output .= $this->coursecat_courses($chelper, $courses, $totalcount);
+
+            // MNET
+            if (!empty($rcourses)) {
+                // at the IDP, we know of all the remote courses
+                $output .= html_writer::start_tag('div', array('class' => 'courses'));
+                foreach ($rcourses as $course) {
+                    $output .= $this->frontpage_remote_course($course);
+                }
+                $output .= html_writer::end_tag('div'); // .courses
+            } elseif (!empty($rhosts)) {
+                // non-IDP, we know of all the remote servers, but not courses
+                $output .= html_writer::start_tag('div', array('class' => 'courses'));
+                foreach ($rhosts as $host) {
+                    $output .= $this->frontpage_remote_host($host);
+                }
+                $output .= html_writer::end_tag('div'); // .courses
+            }
+        }
+        return $output;
+    }
+
+    /**
+     * Returns HTML to print list of available courses for the frontpage
+     *
+     * @return string
+     */
+    public function frontpage_available_courses() {
+        global $CFG;
+        require_once($CFG->libdir. '/coursecatlib.php');
+
+        $chelper = new coursecat_helper();
+        $chelper->set_show_courses(self::COURSECAT_SHOW_COURSES_EXPANDED)->
+                set_courses_display_options(array(
+                    'recursive' => true,
+                    'limit' => $CFG->frontpagecourselimit,
+                    'viewmoreurl' => new moodle_url('/course/index.php'),
+                    'viewmoretext' => new lang_string('fulllistofcourses')));
+
+        $chelper->set_attributes(array('class' => 'frontpage-course-list-all'));
+        $courses = coursecat::get(0)->get_courses($chelper->get_courses_display_options());
+        $totalcount = coursecat::get(0)->get_courses_count($chelper->get_courses_display_options());
+        if (!$totalcount && !$this->page->user_is_editing() && has_capability('moodle/course:create', context_system::instance())) {
+            // Print link to create a new course, for the 1st available category.
+            return $this->add_new_course_button();
+        }
+        return $this->coursecat_courses($chelper, $courses, $totalcount);
     }
 
     /** DONE

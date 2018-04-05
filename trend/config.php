@@ -69,7 +69,7 @@ $THEME->requiredblocks = '';
 $THEME->addblockposition = BLOCK_ADDBLOCK_POSITION_FLATNAV;
 
 // This is the function that returns the SCSS source for the main file in our theme. We override the boost version because          
-// we want to allow presets uploaded to our own theme file area to be selected in the preset list.                                  
+// we want to allow presets uploaded to our own theme file area to be selected in the preset list. 
 $THEME->scss = function($theme) {                                                                                                   
     return theme_trend_get_main_scss_content($theme);                                                                               
 };
@@ -82,7 +82,7 @@ $THEME->layouts = [
     // Standard layout with blocks, this is recommended for most pages with general information.
     'standard' => array(
         'file' => 'columns2.php',
-        'regions' => array('side-pre'),
+        'regions' => array('side-pre', 'search-header'),
         'defaultregion' => 'side-pre',
     ),
     // Main course page.
@@ -94,7 +94,7 @@ $THEME->layouts = [
     ),
     'coursecategory' => array(
         'file' => 'columns2.php',
-        'regions' => array('side-pre'),
+        'regions' => array('side-pre', 'search-header'),
         'defaultregion' => 'side-pre',
     ),
     // Part of course, typical for modules - default page layout if $cm specified in require_login().
@@ -106,7 +106,7 @@ $THEME->layouts = [
     // The site home page.
     'frontpage' => array(
         'file' => 'columns2.php',
-        'regions' => array('side-pre'),
+        'regions' => array('side-pre', 'search-header'),
         'defaultregion' => 'side-pre',
         'options' => array('nonavbar' => true),
     ),
@@ -135,3 +135,5 @@ $THEME->layouts = [
         'options' => array('langmenu' => true),
     )
 ];
+
+$THEME->prescsscallback = 'theme_trend_get_pre_scss';

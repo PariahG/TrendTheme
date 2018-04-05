@@ -51,7 +51,7 @@ function theme_trend_pluginfile($course, $cm, $context, $filearea, $args, $force
 }
 
     /**
-     * Initialize page
+     * Initialize page with extra plugin jQuery
      * @param moodle_page $page
      */
     function theme_trend_page_init(moodle_page $page) {
@@ -93,6 +93,41 @@ function theme_trend_get_main_scss_content($theme) {
  
     // Combine them together.                                                                                                       
     return $scss . "\n" . $pre . "\n" . $trendcss . "\n" . $post;                                                                                                                  
+}
+
+/**
+ * Get SCSS to prepend.
+ *
+ * @param theme_config $theme The theme config object.
+ * @return array
+ */
+function theme_trend_get_pre_scss($theme) {
+    global $CFG;
+
+    $scss = '';
+    $configurable = [
+        // Config key => [variableName, ...].
+        'brandcolor' => ['brand-primary'],
+        'brandsecondcolor' => ['brand-secondary'],
+    ];
+
+    // Prepend variables first.
+    foreach ($configurable as $configkey => $targets) {
+        $value = isset($theme->settings->{$configkey}) ? $theme->settings->{$configkey} : null;
+        if (empty($value)) {
+            continue;
+        }
+        array_map(function($target) use (&$scss, $value) {
+            $scss .= '$' . $target . ': ' . $value . ";\n";
+        }, (array) $targets);
+    }
+
+    // Prepend pre-scss.
+    if (!empty($theme->settings->scsspre)) {
+        $scss .= $theme->settings->scsspre;
+    }
+
+    return $scss;
 }
 
 /**
@@ -154,7 +189,7 @@ function theme_trend_update_settings_images($settingname) {
      * 
      * @param $number is the iterated number from the FOR loop.
      * @param $selecter should be chosen between 'name' and 'id'. ONLY those strings should be used.
-     * Defaults to ID if no parameter used.
+     * Defaults to ID if either no parameter, or incorrect parameter used.
      *
      * @return string
      */
@@ -168,7 +203,9 @@ function theme_trend_update_settings_images($settingname) {
         $count = 0;
         $numarray = array();
         $namearray = array();
-        if ($selecter == null) {
+        
+        // Set default to 'id', and add a check to ensure that the function doesn't break.
+        if ($selecter == null || ($selecter != 'id' && $selecter != 'name')) {
             $selecter = 'id';
         }
         
@@ -227,14 +264,14 @@ function theme_trend_update_settings_images($settingname) {
      * @return BOOLEAN
      */
     function trend_catenrolled($catid) {
-        global $CFG;
-        global $USER;
+        global $CFG, $USER;
         require_once($CFG->libdir. '/coursecatlib.php');
 
         $chelper = new coursecat_helper();
         $bool = null;
         $courselist = get_courses($catid);
         
+        // Checks to see if the logged in user is enrolled in any of the courses within the category.
         foreach ($courselist as $course) {
             $id = $course->id;
             $context = context_course::instance($id);
@@ -265,12 +302,49 @@ function theme_trend_update_settings_images($settingname) {
             $theme = theme_config::load('trend');
         }
         
+        // Checks to see if anything other than 'course' is used in the 2nd parameter. Avoids the function breaking.
+        if ($course != null && $course != 'course') {
+            $course = null;
+        }
+        
+        // Selects either the 'catview' or 'catcourseview' setting.
         $catviewsetting = 'cat'.$course.'view'.$catid;
         
         if (!empty($theme->settings->$catviewsetting)) {
-            $option = $theme->settings-$catviewsetting;
+            $option = $theme->settings->$catviewsetting;
         }
         
         return $option;
+        
+    }
+    
+    /**
+     * Returns the footer details that were added in Settings depending on the $select input.
+     * 
+     * @param $select:
+     * Use MAIL to select email address
+     * Use PHONE to select phone number
+     * 
+     * @todo can expand this for every footer setting by adding new parameters in settings.
+     * No need to update this function every time, just keep naming consistent ie: 'footermail'.
+     *
+     * @return string
+     */
+function trend_footer_info($select) {
+        static $theme;
+        if (empty($theme)) {
+            $theme = theme_config::load('trend');
+        }
+        
+        // Select the correct setting based on the input
+        $item = 'footer' . strtolower($select);
+        $output = '';
+        
+        // Retrieve the setting
+        if (!empty($theme->settings->$item)) {
+            $output = $theme->settings->$item;
+        }
+        
+        return $output;
         
     }

@@ -80,27 +80,55 @@ if ($ADMIN->fulltree) {
     $description = get_string('brandcolor_desc', 'theme_trend');                                                                    
     $setting = new admin_setting_configcolourpicker($name, $title, $description, '');                                               
     $setting->set_updatedcallback('theme_reset_all_caches');                                                                        
-    $page->add($setting);                                                                                                           
+    $page->add($setting);               
+                                  
+    $name = 'theme_trend/brandsecondcolor';                                                                                               
+    $title = get_string('brandsecondcolor', 'theme_trend');                                                                               
+    $description = get_string('brandsecondcolor_desc', 'theme_trend');                                                                    
+    $setting = new admin_setting_configcolourpicker($name, $title, $description, '');                                               
+    $setting->set_updatedcallback('theme_reset_all_caches');                                                                        
+    $page->add($setting);                                                                                                  
                                                               
     $settings->add($page);                                                                                                          
  
-    // Advanced settings || Boost default                                                                           
-    $page = new admin_settingpage('theme_trend_advanced', get_string('advancedsettings', 'theme_trend'));                           
-                                                                        
-    $setting = new admin_setting_configtextarea('theme_trend/scsspre',                                                              
-        get_string('rawscsspre', 'theme_trend'), get_string('rawscsspre_desc', 'theme_trend'), '', PARAM_RAW);                      
-    $setting->set_updatedcallback('theme_reset_all_caches');                                                                        
-    $page->add($setting);                                                                                                           
-                                                                           
-    $setting = new admin_setting_configtextarea('theme_trend/scss', get_string('rawscss', 'theme_trend'),                           
-        get_string('rawscss_desc', 'theme_trend'), '', PARAM_RAW);                                                                  
-    $setting->set_updatedcallback('theme_reset_all_caches');                                                                        
-    $page->add($setting);                                                                                                        
+    // Advanced settings
+    $page = new admin_settingpage('theme_trend_advanced', get_string('advancedsettings', 'theme_trend'));
+
+    /* Footer settings
+     * 
+     * All settings under this footer section should be named 'footer[setting]' in order for the trend_footer_info()
+     * function to pull the correct information. (footermail, footerphone, footertwitter, etc.)
+     * 
+     */
+    
+    $name = 'theme_trend/footertitle';
+    $setting = new admin_setting_heading($name, 'Footer settings','');
+    $page->add($setting);
+    
+    $name = 'theme_trend/footermail';
+    $title =get_string('footermailtitle', 'theme_trend');
+    $description = get_string('footermaildesc', 'theme_trend');
+    $setting = new admin_setting_configtext($name, $title, $description, '');
+    $setting->set_updatedcallback('theme_reset_all_caches');
+    $page->add($setting);
+    
+    $name = 'theme_trend/footerphone';
+    $title =get_string('footerphonetitle', 'theme_trend');
+    $description = get_string('footerphonedesc', 'theme_trend');
+    $setting = new admin_setting_configtext($name, $title, $description, '');
+    $setting->set_updatedcallback('theme_reset_all_caches');
+    $page->add($setting);
+    
+    $name = 'theme_trend/footercopy';
+    $title =get_string('footercopytitle', 'theme_trend');
+    $description = get_string('footercopydesc', 'theme_trend');
+    $setting = new admin_setting_configtext($name, $title, $description, '');
+    $setting->set_updatedcallback('theme_reset_all_caches');
+    $page->add($setting);
  
-    $settings->add($page);       
+    $settings->add($page);
     
     // Category settings 
-    // This is the first custom tab for Trend
     $page = new admin_settingpage('theme_trend_addimages', get_string('addimages', 'theme_trend'));  
     
     $catnum = trend_catnum();

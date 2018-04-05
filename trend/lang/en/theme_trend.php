@@ -31,9 +31,13 @@ $string['logo'] = 'Logo image';
 // The Logo setting description.
 $string['logodesc'] = 'Upload your company logo here. This will be used in the header on the front page, as well as on the sticky nav.';
 // The brand colour setting.                                                                                                        
-$string['brandcolor'] = 'Brand colour';
+$string['brandcolor'] = 'Brand primary colour';
 // The brand colour setting description.                                                                                            
-$string['brandcolor_desc'] = 'The accent colour.';     
+$string['brandcolor_desc'] = 'The main accent colour to be used throughout the site.';     
+// The brand secondary colour setting.                                                                                                        
+$string['brandsecondcolor'] = 'Brand secondary colour';
+// The brand secondary colour setting description.                                                                                            
+$string['brandsecondcolor_desc'] = 'The secondary accent colour. This will be used for a few smaller elements such as footer links.';     
 // A description shown in the admin theme selector.                                                                                 
 $string['choosereadme'] = 'Theme Trend is a child theme of Boost. It adds the ability to upload background photos.';                
 // Name of the settings pages.                                                                                                      
@@ -59,17 +63,30 @@ $string['rawscsspre'] = 'Raw initial SCSS';
 // Raw initial SCSS setting help text.                                                                                              
 $string['rawscsspre_desc'] = 'In this field you can provide initialising SCSS code, it will be injected before everything else. Most of the time you will use this setting to define variables.';
 // We need to include a lang string for each block region.                                                                          
-$string['region-side-pre'] = 'Right';
+$string['region-side-pre'] = 'Right';                                                    
+$string['region-search-header'] = 'Header';
 // Background image for login page.                                                                                                 
 $string['loginbackgroundimage'] = 'Login page background image';                                                                    
 // Background image for login page.                                                                                                 
 $string['loginbackgroundimage_desc'] = 'An image that will be stretched to fill the background of the login page.';
 // Category name test.                                                                                                                
 $string['categories'] = '';
-// The name of the third tab in the theme settings.                                                                                
+// Strings for the Settings page                                                                            
 $string['addimages'] = 'Category settings';
-
 $string['settingcatimage'] = ' category image';
 $string['settingcatselect'] = 'Select a Category';
 $string['settingcatimage_desc'] = 'Upload an image that will be used for the ';
 $string['settingcatselect_desc'] = 'Select which category to upload the image for.';
+$string['footermailtitle'] = 'Email Address';
+$string['footermaildesc'] = 'Enter the email address to be displayed in the footer.';
+$string['footerphonetitle'] = 'Contact Number';
+$string['footerphonedesc'] = 'Enter the phone number to be displayed in the footer.';
+$string['footercopytitle'] = 'Copyright information';
+$string['footercopydesc'] = 'Enter the copyright information to be displayed below the footer. Add "& copy ;" (without spaces) to the text for the copyright symbol.';
+// Login page strings
+$string['firsttime'] = 'New to Online Training?';
+$string['startsignup'] = 'Register an Account';
+$string['infosignup'] = 'If you are new to Online Training and don\'t have an account you can apply for one below. Your application will be reviewed by a site administrator before approval, as this service is only available to our customers and staff.';
+$string['logintitle'] = 'Log in to Online Training';
+
+

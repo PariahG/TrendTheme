@@ -17,7 +17,7 @@
 defined('MOODLE_INTERNAL') || die();
 
 /**
- * A login page layout for the boost theme.
+ * A login page layout for the trend theme.
  *
  * @package   theme_trend
  * @copyright 2018 Allan Levitt || http://www.alevitt.co.za

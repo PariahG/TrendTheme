@@ -1,6 +1,6 @@
 // The Main CSS file for Trend. This is where the core layout and changes from Boost will be applied.
 
-// Base styles / defaults
+// Global styles / defaults
 // -------------------------------------------------------------------------------------------------------------------
 body {
     @include bg-lin-grad($gray-light3, $gray-lightest);
@@ -23,24 +23,126 @@ a {
         text-decoration: none;
     }
 }
-// Login Page
+input[type="text"], textarea, input[type='password'] {
+    @include anim-timing(0.2s);
+    border:1px solid $gray-light2;
+    border-radius: 0;
+    background-color:$rollover;
+    &:focus {
+        border-color:$brand-secondary;
+        outline:none;
+    }
+}
+button, .btn, input[type="submit"] {
+    @include anim-timing(0.2s);
+    border-radius: 0;
+    &:focus, &:active {
+        outline:none;
+    }
+}
+.custom-select {
+    border-radius:0;
+    &:focus {
+        border-color:$brand-secondary;
+        outline:none;
+    }
+}
+
+.breadcrumb {
+    a {
+        color:$brand-secondary;
+    }
+   .breadcrumb-item:last-child > a {
+        color: $brand-primary;
+    }  
+}
+// -------------------------------------------------------------------------------------------------------------------
+
+// Login page
+// -------------------------------------------------------------------------------------------------------------------
 .login-page {
-    background-image: url([[pix:theme|login-bg]]);
+    background-image: $login-bg;
     background-size:cover;
-    background-position: top left;
     background-color: linear-gradient($gray-light3, $gray-lightest) fixed;
     #page {
         margin-top:0 !important;
     }
-    .card {
+    .loginbox {
         background-color: rgba(255,255,255,0.9) !important;
+        padding:2rem;
+        margin:5rem auto;
+        max-width:50%;
+        .login-header {
+            padding-bottom:0.5rem;
+            margin:0;
+            border-bottom:1px solid;
+            border-color:$brand-secondary;
+        }
+        .loginsub {
+            @extend %grid;
+            @extend %2-grid-layout-b;
+            padding-bottom:1rem;
+            margin:1rem 0;
+            border-bottom:1px solid;
+            border-color:$brand-secondary;
+            .login-form {
+                input[type='text'], input[type='password'] {
+                    width:90%;
+                    margin-bottom:0.4rem;
+                }
+                input[type='submit'] {
+                    width:35%;
+                    min-width:5rem;
+                    padding:0.3rem 0.6rem;
+                    background-color:$brand-primary;
+                    border:none;
+                    color:#fff;
+                    &:hover {
+                        background-color:$gray;
+                    }
+                    &:active, &:focus {
+                        outline:none;
+                    }
+                }
+            }
+            .login-side {
+                // Nothing here, just a placeholder for now. Default styling works.
+            }
+        }
+        .signuppanel {
+            input[type='submit'] {
+                width:35%;
+                min-width:10rem;
+                padding:0.5rem 0.6rem;
+                background-color:$gray-light;
+                border:none;
+                color:#fff;
+                &:hover {
+                    background-color:$brand-primary;
+                }
+                &:active, &:focus {
+                    outline:none;
+                }
+            }
+        }
+        .loginerrors {
+            background-color:$brand-primary;
+            padding:0.4rem;
+            margin:0.3rem 0;
+            width:100%;
+            color:#fff;
+            text-align:center;
+            a {
+                color:#fff;
+            }
+            .error {
+                color:#fff;
+                .text-warning {
+                    color:#fff !important;
+                }
+            }
+        }
     }
-}
-
-$breadcrumb-divider: "|";
-
-#region-main-settings-menu.has-blocks, #region-main.has-blocks {
-    width:inherit;
 }
 // -------------------------------------------------------------------------------------------------------------------
 
@@ -286,6 +388,134 @@ $breadcrumb-divider: "|";
 }
 // -------------------------------------------------------------------------------------------------------------------
 
+// Header Block region || Currently only the custom search block goes here
+// -------------------------------------------------------------------------------------------------------------------
+#block-region-search-header {
+    @extend %display-responsive;
+    .block {
+        @extend %search-width;
+        position:absolute;
+        right:6rem;
+        background-color: transparent;
+        border:none;
+        .card-block {
+            padding:0.5rem;
+            .card-title {
+                display:none;
+            }
+            .content {
+                float:right;
+                .form-title {
+                    color:$gray-light;
+                    font-size:1.3rem;
+                    margin-right:0.4rem;
+                    line-height: 3.8rem;
+                    display:inline-block;
+                }
+                form > fieldset {
+                    float:right;
+                    .searchField {
+                        @include anim-timing(0.2s);
+                        @extend %search-field-width;
+                        border:1px solid $gray-light2;
+                        border-radius: 0;
+                        background-color:$rollover;
+                        &:focus {
+                            border-color:$brand-secondary;
+                            outline:none;
+                        }
+                    }
+                    .searchButton {
+                        @include anim-timing(0.2s);
+                        height:auto;
+                        width:5rem;
+                        color:#fff;
+                        line-height:2rem;
+                        background-color: $gray-light;
+                        border: none;
+                        &:disabled {
+                            color:$gray-lightest;
+                            background-color:$gray-light2;
+                            border:1px solid $gray-lighter;
+                        }
+                        &:hover, &:focus, &:active {
+                            background-color: $brand-primary;
+                            outline:none;
+                        }
+                    }
+                    #questionMark {
+                        display:none;
+                    }
+                }
+            }
+        }
+    }
+}
+// Specifically for the course_search plugin's results page'
+ul.block_course_search_result_list {
+    padding-left:0;
+    li {
+        margin-bottom:0.4rem;
+        a > img {
+            max-width:1rem;
+            margin-right:0.2rem;
+        }
+    }
+}
+.searchformBtm {
+    form > fieldset {
+        input[type="text"] {
+            @include anim-timing(0.2s);
+            min-width: 15rem;
+            padding:0.3rem;
+            border:1px solid $gray-light2;
+            border-radius: 0;
+            background-color:$rollover;
+            margin-right:0.8rem;
+            height:2.4rem;
+            &:focus {
+                border-color:$brand-secondary;
+                outline:none;
+            }
+        }
+        input[type="submit"] {
+            @include anim-timing(0.2s);
+            height:auto;
+            width:5rem;
+            color:#fff;
+            line-height:2rem;
+            background-color: $gray-light;
+            border: 1px solid;
+            border-color:$gray-light;
+            &:disabled {
+                color:$gray-lightest;
+                background-color:$gray-light2;
+                border-color:$gray-lighter;
+            }
+            &:hover, &:focus, &:active {
+                background-color: $brand-primary;
+                outline:none;
+                border-color:$brand-primary;
+            }
+        }
+        #questionMark {
+            display:none;
+        }
+    }
+}
+.searchformButton {
+    font-size: 1.2rem;
+    line-height: 1.2rem;
+    padding:1rem;
+    color:#fff;
+    border: none;
+    background-color:$gray-light;
+    &:hover {
+        background-color:$brand-primary;
+    }
+}
+// -------------------------------------------------------------------------------------------------------------------
+
 // Footer
 // -------------------------------------------------------------------------------------------------------------------
 // Block Region above the footer
@@ -309,6 +539,9 @@ $breadcrumb-divider: "|";
 #page-footer {
     padding-left:2rem;  
     padding-right:2rem;  
+    .logininfo {
+        color:#fff;
+    }
     @extend %footer-bg;
     .footer-container {
         @extend %grid;
@@ -326,7 +559,7 @@ $breadcrumb-divider: "|";
         padding:0;
     }
     .footer-link {
-        color:$brand-primary;
+        color:$brand-secondary;
         text-decoration: none;
     }
     a:hover {
@@ -335,6 +568,19 @@ $breadcrumb-divider: "|";
     }
     .footer-box {
         padding:1rem;
+    }
+    .footer-icon {
+        width:1.7rem;
+        height:1.7rem;
+        padding:0 0.6rem 0 0;
+        margin:0;
+    }
+    .footer-copyright {
+        color:#fff;
+        text-align: center;
+        clear:both;
+        margin:0;
+        padding:0.6rem 0 0 0;
     }
 }
 // -------------------------------------------------------------------------------------------------------------------
