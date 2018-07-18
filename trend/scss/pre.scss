@@ -4,14 +4,6 @@
 // Import custom fonts
 // -------------------------------------------------------------------------------------------------------------------
 @font-face {
-    font-family: 'Omnes';
-    src: url('trend/fonts/Omnes-Regular.eot'); /* IE9 Compat Modes */
-    src: url('trend/fonts/Omnes-Regular.eot?#iefix') format('embedded-opentype'), /* IE6-IE8 */
-            url('trend/fonts/Omnes-Regular.woff') format('woff'), /* Modern Browsers */
-            url('trend/fonts/Omnes-Regular.ttf')  format('truetype'), /* Safari, Android, iOS */
-            url('trend/fonts/Omnes-Regular.svg#svgOmnes-Regular') format('svg'); /* Legacy iOS */
-}
-@font-face {
     font-family: 'Awesome';
     src: url('trend/fonts/fontawesome-webfont.eot'); /* IE9 Compat Modes */
     src: url('trend/fonts/fontawesome-webfont.eot?#iefix') format('embedded-opentype'), /* IE6-IE8 */
@@ -46,7 +38,7 @@ $spacer-y: $spacer !default;
 $border-width: 1px !default;
 
 // Typography
-$font-family-sans-serif: "Open Sans", "Helvetica Neue", Arial, sans-serif !default;
+$font-family-sans-serif: "Lato", "Helvetica Neue", Arial, sans-serif !default;
 $font-size-root: 14px !default;
 
 // Tables
@@ -91,6 +83,7 @@ $33_div:                    (100% - 2rem) / 3;
 $50_div:                    (100% - 1rem) / 2;
 $66_div:                    $33_div * 2;
 $login-bg:                  url([[pix:theme_trend|loginbackgroundimage]]) !default;
+$footer-bg:             url([[pix:theme|footer-bg]]) !default;
 // -------------------------------------------------------------------------------------------------------------------
 
 // Base classes
@@ -145,25 +138,44 @@ $login-bg:                  url([[pix:theme_trend|loginbackgroundimage]]) !defau
 %footer-bg {
     background: no-repeat;
     background-size: cover;
-    background-image: url('trend/pix/footer-bg.jpg');
+    //background-image: $footer-bg;
     background-color: $brand-primary;
 }
 %grid {
-    display:inline-grid;
+    display: grid;
     grid-gap:1rem;
     width:100%;
 }
+%flex-grid {
+    display: flex;
+    justify-content: space-around;
+    flex-wrap: wrap;
+    width:100%;
+}
+%flex-grid-b {
+    display: flex;
+    justify-content: space-around;
+    flex-wrap: wrap;
+    width:100%;
+}
+%flex-grid-c {
+    display: flex;
+    justify-content: flex-start;
+    vertical-align: middle;
+    flex-wrap: wrap;
+    width:100%;
+}
 %4-grid-layout {
-        grid-template-columns: $25_div $25_div $25_div $25_div;
+        grid-template-columns: repeat(4, $25_div);
 }
 %3-grid-layout {
-        grid-template-columns: $33_div $33_div $33_div;
+        grid-template-columns: repeat(3, $33_div);
 }
 %2-grid-layout-a {
         grid-template-columns: $66_div $33_div;
 }
 %2-grid-layout-b {
-        grid-template-columns: $50_div $50_div;
+        grid-template-columns: repeat(2, $50_div);
 }
 %2-grid-layout-c {
         grid-template-columns: $33_div $66_div;
@@ -171,20 +183,37 @@ $login-bg:                  url([[pix:theme_trend|loginbackgroundimage]]) !defau
 %1-grid-layout {
         grid-template-columns: $50_div * 2;
 }
+%flex-layout-2 {
+        width:49%;
+        margin-bottom:1rem;
+}
 // -------------------------------------------------------------------------------------------------------------------
 
 // Responsive values
 // -------------------------------------------------------------------------------------------------------------------
 // Large window
 @media (min-width: 1200px) { 
+    %course-flex {
+        margin-right:auto;
+    }
     %grid-responsive {
-        grid-template-columns: $25_div $25_div $25_div $25_div;
+        grid-template-columns: repeat(4, $25_div);
     } 
     %grid-footer-responsive {
         grid-template-columns: $25_div $25_div $50_div;
     }
     %display-responsive {
         display: block;
+    }
+    %flex-child-responsive {
+            width:24%;
+            margin-right:1%;
+            margin-bottom:1rem;
+    }
+    %footer-child-responsive {
+            width:32%;
+            margin-right:1%;
+            margin-bottom:1rem;
     }
     %search-width {
         width:60%;
@@ -196,6 +225,9 @@ $login-bg:                  url([[pix:theme_trend|loginbackgroundimage]]) !defau
 // -------------------------------------------------------------------------------------------------------------------
 // Medium window
 @media (min-width: 768px) and (max-width: 1199px) { 
+    %course-flex {
+        margin-right:auto;
+    }
     %grid-responsive {
         grid-template-columns: $50_div $50_div;
     }
@@ -204,6 +236,16 @@ $login-bg:                  url([[pix:theme_trend|loginbackgroundimage]]) !defau
     }
     %display-responsive {
         display: block;
+    }
+    %flex-child-responsive {
+            width:49%;
+            margin-right:1%;
+            margin-bottom:1rem;
+    }
+    %footer-child-responsive {
+            width:49%;
+            margin-right:1%;
+            margin-bottom:1rem;
     }
     %search-width {
         width:45%;
@@ -215,6 +257,9 @@ $login-bg:                  url([[pix:theme_trend|loginbackgroundimage]]) !defau
 // -------------------------------------------------------------------------------------------------------------------
 // Small window
 @media (min-width: 0px) and (max-width: 767px) { 
+    %course-flex {
+        margin-right:1%;
+    }
     %grid-responsive {
         grid-template-columns: $50_div * 2;
     }
@@ -224,13 +269,23 @@ $login-bg:                  url([[pix:theme_trend|loginbackgroundimage]]) !defau
     %display-responsive {
         display: none;
     }
+    %flex-child-responsive {
+            width:100%;
+            margin-right:1%;
+            margin-bottom:1rem;
+    }
+    %footer-child-responsive {
+            width:100%;
+            margin-right:auto;
+            margin-bottom:1rem;
+    }
     %cat-hover-responsive {
         background:$brand-primary;
         color:$rollover;
         text-decoration: none;
     }
     %catname-hover-responsive {
-        color:$rollover;
+        color:$rollover !important;
     }
     %med-header-text {
         border-bottom:0;

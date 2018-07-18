@@ -17,24 +17,21 @@
 {{!
     Page header.
 }}
+
+<a href="{{{ config.wwwroot }}}" class="navbar-brand logo-before" id="top-logo">
+                {{{ output.site_logo_url }}}
+        </a>
+
 <header role="banner" class="pos-f-t navbar navbar-full navbar-light bg-faded navbar-static-top moodle-has-zindex">
+
+
+    {{{ output.trend_logoheader }}}
 
     <div class="container-fluid navbar-nav">
 
         <div data-region="drawer-toggle">
             <button aria-expanded="{{#navdraweropen}}true{{/navdraweropen}}{{^navdraweropen}}false{{/navdraweropen}}" aria-controls="nav-drawer" type="button" class="btn pull-xs-left m-r-1 btn-secondary btn-header" data-action="toggle-drawer" data-side="left" data-preference="drawer-open-nav">{{#pix}}i/menubars{{/pix}}<span class="sr-only">{{#str}}sidepanel, core{{/str}}</span></button>
         </div>
-        <a href="{{{ config.wwwroot }}}" class="navbar-brand 
-            {{^ output.should_display_navbar_logo }}
-                hidden-sm-down
-            {{/ output.should_display_navbar_logo }}
-                ">
-            {{# output.should_display_navbar_logo }}
-                <div class="logo">
-                    <img src="{{output.get_compact_logo_url}}" alt="{{sitename}}">
-                </div>
-            {{/ output.should_display_navbar_logo }}
-        </a>
 
         <!-- user_menu -->
         {{{ output.user_menu }}}

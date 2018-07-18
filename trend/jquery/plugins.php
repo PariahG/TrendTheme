@@ -43,5 +43,6 @@
 defined('MOODLE_INTERNAL') || die();
 
 $plugins = array(
-    'accordion' => array('files' => array('accordion.js'))
+    'trend' => array('files' => array('trend.js')),
+    'accordion' => array('files' => array('accordion.js')),
 );

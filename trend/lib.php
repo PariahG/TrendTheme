@@ -57,6 +57,7 @@ function theme_trend_pluginfile($course, $cm, $context, $filearea, $args, $force
     function theme_trend_page_init(moodle_page $page) {
         global $CFG;
         $page->requires->jquery();
+        $page->requires->jquery_plugin('trend', 'theme_trend');
         $page->requires->jquery_plugin('accordion', 'theme_trend');
     }
 
@@ -172,11 +173,9 @@ function theme_trend_update_settings_images($settingname) {
      *
      * @return integer
      */
-    function trend_catnum() {
+    function trend_catno() {
         global $CFG;
         require_once($CFG->libdir. '/coursecatlib.php');
-                
-        $chelper = new coursecat_helper();
         
         $num = coursecat::count_all();
         
@@ -197,8 +196,6 @@ function theme_trend_update_settings_images($settingname) {
         global $CFG;
         require_once($CFG->libdir. '/coursecatlib.php');
                         
-        $chelper = new coursecat_helper();
-        
         $entries = coursecat::make_categories_list();
         $count = 0;
         $numarray = array();
@@ -247,7 +244,7 @@ function theme_trend_update_settings_images($settingname) {
             $theme = theme_config::load('trend');
         }
         
-        $catimgsetting = 'catimage_'.$catid;
+        $catimgsetting = 'catimage_' . $catid;
         
         if (!empty($theme->settings->$catimgsetting)) {
             $url = $theme->setting_file_url($catimgsetting, $catimgsetting);
@@ -259,7 +256,7 @@ function theme_trend_update_settings_images($settingname) {
     
     /**
      * Returns a TRUE / NULL based on whether or not a user is enrolled in a course within the given category.
-     * Don't need to know which courses as the only important thing is the user is enrolled in at least 1 of them.
+     * Don't need to know which courses as the only important thing is that the user is enrolled in at least 1 of them.
      *
      * @return BOOLEAN
      */
@@ -267,7 +264,6 @@ function theme_trend_update_settings_images($settingname) {
         global $CFG, $USER;
         require_once($CFG->libdir. '/coursecatlib.php');
 
-        $chelper = new coursecat_helper();
         $bool = null;
         $courselist = get_courses($catid);
         
@@ -308,7 +304,7 @@ function theme_trend_update_settings_images($settingname) {
         }
         
         // Selects either the 'catview' or 'catcourseview' setting.
-        $catviewsetting = 'cat'.$course.'view'.$catid;
+        $catviewsetting = 'cat' . $course . 'view' . $catid;
         
         if (!empty($theme->settings->$catviewsetting)) {
             $option = $theme->settings->$catviewsetting;
@@ -322,8 +318,9 @@ function theme_trend_update_settings_images($settingname) {
      * Returns the footer details that were added in Settings depending on the $select input.
      * 
      * @param $select:
-     * Use MAIL to select email address
-     * Use PHONE to select phone number
+     * Use 'mail' to select email address
+     * Use 'phone' to select phone number
+     * Etc.
      * 
      * @todo can expand this for every footer setting by adding new parameters in settings.
      * No need to update this function every time, just keep naming consistent ie: 'footermail'.
@@ -337,7 +334,7 @@ function trend_footer_info($select) {
         }
         
         // Select the correct setting based on the input
-        $item = 'footer' . strtolower($select);
+        $item = 'footer' . $select;
         $output = '';
         
         // Retrieve the setting
@@ -346,5 +343,27 @@ function trend_footer_info($select) {
         }
         
         return $output;
+        
+    }
+    
+    /**
+     * Returns the logo image url from the theme.
+     * 
+     *
+     * @return URL
+     */
+    function trend_logo() {
+        static $theme;
+        if (empty($theme)) {
+            $theme = theme_config::load('trend');
+        }
+        
+        $image = 'logo';
+        
+        if (!empty($theme->settings->$image)) {
+            $url = $theme->setting_file_url($image, $image);
+        }
+        
+        return $url;
         
     }

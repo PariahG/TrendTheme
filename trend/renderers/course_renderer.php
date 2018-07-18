@@ -594,10 +594,11 @@ class theme_trend_format_topics_renderer extends format_topics_renderer {
      */
     protected function section_header($section, $course, $onsectionpage, $sectionreturn=null) {
         global $PAGE;
-        $PAGE->requires->jquery();
+        //$PAGE->requires->jquery();
         $o = '';
         $currenttext = '';
         $sectionstyle = '';
+        $display ='';
 
         if ($section->section != 0) {
             // Only in the non-general sections.

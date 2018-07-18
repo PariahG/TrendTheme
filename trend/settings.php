@@ -25,6 +25,8 @@
 // This line protects the file from being accessed by a URL directly.
 defined('MOODLE_INTERNAL') || die();
 
+// Need to manually include the lib file as this no longer loads in on its own.
+require_once($CFG->dirroot . '/theme/trend/lib.php');
                                                                                
 if ($ADMIN->fulltree) {                                                                                                             
                       
@@ -131,37 +133,37 @@ if ($ADMIN->fulltree) {
     // Category settings 
     $page = new admin_settingpage('theme_trend_addimages', get_string('addimages', 'theme_trend'));  
     
-    $catnum = trend_catnum();
+    $catnum = trend_catno();
     
     for ($i = 1; $i <= $catnum; $i++) {
         // Category Section generator.    
         $catname = trend_catid($i, 'name');
         $catid =  trend_catid($i);
 
-        $name = 'theme_trend/catname'.$catid;
+        $name = 'theme_trend/catname' . $catid;
         $setting = new admin_setting_heading($name, $catname,'');
         $page->add($setting);
         
-        $name = 'theme_trend/catview'.$catid;
-        $title = $catname.' category visibility';
-        $description = 'Set whether or not the '.$catname.' category will be visible to users who are not enrolled in any courses within the category.';
+        $name = 'theme_trend/catview' . $catid;
+        $title = $catname . ' category visibility';
+        $description = 'Set whether or not the ' . $catname . ' category will be visible to users who are not enrolled in any courses within the category.';
         $default = '0';
         $setting = new admin_setting_configcheckbox($name, $title, $description, $default);
         $setting->set_updatedcallback('theme_reset_all_caches');
         $page->add($setting);
         
-        $name = 'theme_trend/catcourseview'.$catid;
-        $title = $catname.' course visibility';
-        $description = 'Set whether or not courses in the '.$catname.' category will be visible to users who are not enrolled in those courses.';
+        $name = 'theme_trend/catcourseview' . $catid;
+        $title = $catname . ' course visibility';
+        $description = 'Set whether or not courses in the ' . $catname . ' category will be visible to users who are not enrolled in those courses.';
         $default = '0';
         $setting = new admin_setting_configcheckbox($name, $title, $description, $default);
         $setting->set_updatedcallback('theme_reset_all_caches');
         $page->add($setting);
         
-        $name = 'theme_trend/catimage_'.$catid;
-        $title = $catname.' category image';
-        $description = 'Upload an image that will be used for the '.$catname.' category';
-        $setting = new admin_setting_configstoredfile($name, $title, $description, 'catimage_'.$catid);
+        $name = 'theme_trend/catimage_' . $catid;
+        $title = $catname . ' category image';
+        $description = 'Upload an image that will be used for the ' . $catname . ' category';
+        $setting = new admin_setting_configstoredfile($name, $title, $description, 'catimage_' . $catid);
         $setting->set_updatedcallback('theme_trend_update_settings_images');
         $page->add($setting);
     }

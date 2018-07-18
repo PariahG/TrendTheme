@@ -99,17 +99,12 @@ class theme_trend_core_renderer extends theme_boost\output\core_renderer {
         global $SITE;
         
         $sitename = format_string($SITE->shortname, true, array('context' => context_course::instance(SITEID)));
-        if ($this->should_display_main_logo($headinglevel)) {
-            return html_writer::div(html_writer::empty_tag('img', [
-                'src' => $this->get_logo_url(null, 150), 'alt' => $sitename]), 'logo');
-        } else {
-            $shortname = html_writer::start_div('page-context-header');
-            $shortname .= html_writer::start_div('page-header-headings');
-            $shortname .= html_writer::tag('h1', $sitename, null);
-            $shortname .= html_writer::end_div();
-            $shortname .= html_writer::end_div();
-            return $shortname;
-        }
+        $shortname = html_writer::start_div('page-context-header');
+        $shortname .= html_writer::start_div('page-header-headings');
+        $shortname .= html_writer::tag('h1', $sitename, null);
+        $shortname .= html_writer::end_div();
+        $shortname .= html_writer::end_div();
+        return $shortname;
 
         return parent::context_header($headerinfo, $headinglevel);
     }
@@ -165,8 +160,8 @@ class theme_trend_core_renderer extends theme_boost\output\core_renderer {
         $phoneicon = $OUTPUT->image_url('icons/phone', 'theme_trend');
         
         // Retrieve the contact info
-        $email = trend_footer_info(MAIL);
-        $phone = trend_footer_info(PHONE);
+        $email = trend_footer_info('mail');
+        $phone = trend_footer_info('phone');
 
         $html = html_writer::tag('h4', 'Contact Us', null);
         $html .= html_writer::start_tag('p');
@@ -191,11 +186,47 @@ class theme_trend_core_renderer extends theme_boost\output\core_renderer {
         global $OUTPUT;
         
         // Retrieve the copyright info
-        $info = trend_footer_info(COPY);
+        $info = trend_footer_info('copy');
 
         $html = html_writer::tag('div', $info, array('class' => 'footer-copyright'));
         
         return $html;        
+    }
+    
+    /**
+     *  Theme logo output
+     *  
+     * Renders the logo uploaded in theme settings.
+     * 
+     */
+    public function trend_logoheader() {
+        global $OUTPUT, $CFG;
+        
+        // Retrieve the logo url
+        $logourl = trend_logo();
+
+        $html = html_writer::start_tag('a', array('class' => 'navbar-brand-two', 'href' => $CFG->wwwroot));
+        $html .= html_writer::start_tag('div', array('class' => 'logo-two'));
+        $html .= html_writer::empty_tag('img', array('src' => $logourl));
+        $html .= html_writer::end_tag('div');
+        $html .= html_writer::end_tag('a');
+        
+        return $html;        
+    }
+    
+    /**
+     * Get the logo URL.
+     *
+     * @return string
+     */
+    public function site_logo_url() {
+        $logo = parent::get_logo_url(null, 90);
+        
+        $html = html_writer::start_tag('div', array('class' => 'logo'));
+        $html .= html_writer::empty_tag('img', array('src' => $logo));
+        $html .= html_writer::end_tag('div');
+        
+        return $html;
     }
 
     /**

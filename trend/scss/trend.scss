@@ -7,16 +7,16 @@ body {
 }
 h1, h2, h3, h4, h5 {
     color:$gray-dark;
-    font-weight:300;
-    font-family: 'Omnes';
+    font-weight:500;
+    font-family: 'Lato';
 }
 p, span, li, div {
     color:$gray;
     font-weight:200;
-    font-family: 'Omnes';    
+    font-family: 'Lato';    
 }
 a {
-    font-family: 'Omnes';
+    font-family: 'Lato';
     color:$brand-primary;
     &:hover {
         color:$gray-dark;
@@ -79,13 +79,16 @@ button, .btn, input[type="submit"] {
             border-color:$brand-secondary;
         }
         .loginsub {
-            @extend %grid;
-            @extend %2-grid-layout-b;
+            @extend %flex-grid;
             padding-bottom:1rem;
             margin:1rem 0;
             border-bottom:1px solid;
             border-color:$brand-secondary;
+            &:child {
+                @extend %flex-layout-2;
+            }
             .login-form {
+                width:49%;
                 input[type='text'], input[type='password'] {
                     width:90%;
                     margin-bottom:0.4rem;
@@ -150,10 +153,12 @@ button, .btn, input[type="submit"] {
 // -------------------------------------------------------------------------------------------------------------------
 #frontpage-category-names, .course_category_tree {
     .subcategories {
-        @extend %grid;
-        @extend %grid-responsive;
+     //   @extend %grid;
+   //     @extend %grid-responsive;
+   @extend %flex-grid;
     }
     .category {
+        @extend %flex-child-responsive;
         @include main-radius(0);
         @include anim-timing(0.2s);
         background: $rollover;
@@ -207,8 +212,16 @@ button, .btn, input[type="submit"] {
                 @extend %catname-hover-responsive
             }
         }
+        &:last-child {
+            @extend %course-flex;
+        }
     }
-    // This is a hacky fix to remove the title on the home page.
+    h2 {
+        display:none;
+    }
+}
+// This is a hacky fix to remove the title on the home page.
+#frontpage-category-combo { 
     h2 {
         display:none;
     }
@@ -219,14 +232,16 @@ button, .btn, input[type="submit"] {
 // -------------------------------------------------------------------------------------------------------------------
 .course_category_tree {
     .courses {
-        @extend %grid;
-        @extend %grid-responsive;
+        @extend %flex-grid-b;
         margin:0 0 1rem 0;
         padding-bottom:1.5rem;
         border-bottom:1px solid $brand-primary;
         .coursebox {
+            @extend %flex-child-responsive;
             @include main-radius(0);
             @include anim-timing(0.2s);
+            margin-right:1%;
+            margin-left:0;
             background: $gray-light;
             overflow: hidden;
             text-align:center;
@@ -235,16 +250,22 @@ button, .btn, input[type="submit"] {
             border-color: $gray-lighter;
             box-shadow: 0 0.1rem 0.1rem 0 $shadow-dark;
             text-decoration: none;
+            &:last-child {
+                @extend %course-flex;
+            }
             .courseinfo {
+                @extend %flex-grid-c;
                 padding:0;
+                height:100%;
                 .courseimage {
-                    width:3rem;
+                    align-items: center;
+                    width:20%;
+                    max-width:5rem;
                     min-height:3rem;
                     padding:0.5rem 1rem 0.5rem 0;
                     border-right:1px outset;
                     border-color:$gray-lighter;
-                    margin:0 1rem 0 0;
-                    float:left;
+                    margin:auto 1rem auto 0;
                     text-align:left;
                     img {
                         width:110%;
@@ -253,10 +274,12 @@ button, .btn, input[type="submit"] {
                     }
                 }
                 .coursename {
+                    align-self:center;
+                    width:70%;
                     font-size: 1.6rem;
                     color: $rollover;
                     padding:0;
-                    margin:0;
+                    margin:auto;
                     text-align:left;
                 }
             }
@@ -354,32 +377,65 @@ button, .btn, input[type="submit"] {
 .navbar-brand {
     position:fixed;
     left:2rem;
-    top:0;
-    height:7.5rem;
-    padding:0;
+    height:9rem;
+    padding:0 1.2rem;
+    z-index: 1040;
     background-color:$brand-primary;
     box-shadow: 0 0 0.3rem 0 $shadow-dark;
+    @include anim-timing(0.4s);
     .logo {
         padding:1.8rem 0 0 0;
         margin:0 -0.9rem 0 -0.5rem;
         img {
-            max-width:5rem;
+            max-width:90px;
+            min-width:90px;
+            min-height:90px;
+            padding:0;
+            margin:0;
+        }
+    }
+}
+.navbar-brand-two {
+    position:absolute;
+    left:2rem;
+    top:0;
+    max-height:3.5rem;
+    width:auto;
+    padding:0;
+    .logo-two {
+        padding:0.9rem 0 0 0;
+        margin:0;
+        img {
+            max-width:7rem;
             min-width: 5rem;
-            min-height:5rem;
+            max-height: 2rem;
             padding:0;
             margin:0;
         }
     }
 }
 .btn-header {
-    margin-left:6.5rem;
+    margin-left:8rem;
+    margin-top:0.1rem;
 }
 [data-region="drawer"] {
-    @include bg-lin-grad($gray-light2, $gray-lighter);
+    background-color:#ddd;
     padding: 5rem 2rem 2rem 2rem;
 }
+// This is to hide the 'My courses' and 'More...' links in the nav drawer. This is easier than recoding the entire flat_nav to do the same.
+#nav-drawer {
+    [data-key="courseindexpage"], [data-key="mycourses"] {
+        display:none;
+    }
+}
+.logo-before {
+    top:0;    
+}
+.logo-scrolled {
+    top:-9.5rem;
+}
 .header-closed {
-    margin-left:6.5rem;
+    margin-left:8rem;
     @include anim-timing-no-ease(0.4s);
 }
 .header-open {
@@ -523,10 +579,10 @@ ul.block_course_search_result_list {
     padding: 1rem 2rem 0 2rem;
     @include bg-lin-grad($gray-light2, $gray-lighter);
     .block-region {
-        @extend %grid;
-        @extend %grid-responsive;
+        @extend %flex-grid;
         .block {
             box-shadow: 0 0.1rem 0.5rem 0 $shadow-light;
+            @extend %flex-child-responsive;
         }
         h2, h3, h4 {
             border-bottom:1px solid $gray-lighter;
@@ -544,10 +600,12 @@ ul.block_course_search_result_list {
     }
     @extend %footer-bg;
     .footer-container {
-        @extend %grid;
-        @extend %grid-footer-responsive;
+        @extend %flex-grid-c;
         background-color: rgba(255,255,255,1);
-        box-shadow: 0 0.1rem 0.5rem 0 $shadow-dark;
+   //     box-shadow: 0 0.1rem 0.5rem 0 $shadow-dark;
+        .footer-container > div {
+            @extend %footer-child-responsive;
+        }
     } 
     h3, h4 {
         padding-bottom:0.5rem;
@@ -559,12 +617,18 @@ ul.block_course_search_result_list {
         padding:0;
     }
     .footer-link {
+        @include anim-timing(0.2s);
         color:$brand-secondary;
         text-decoration: none;
     }
-    a:hover {
-        color:$gray-dark;
+    a {
+        @include anim-timing(0.2s);
+        color:$brand-primary;
         text-decoration: none;
+        &:hover {
+            color:$gray-dark;
+            text-decoration: none;
+        }
     }
     .footer-box {
         padding:1rem;
